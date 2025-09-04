@@ -1,4 +1,4 @@
-````markdown
+
 # GPT-5o Chatbot Demo
 
 A client-side GPT-5o chatbot demo with user authentication, free/paid models, hourly message limits, and chat persistence. Built using vanilla JavaScript, HTML, and CSS with a simple localStorage-based backend.
@@ -79,8 +79,8 @@ Question-answer dataset for the chatbot in the format:
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/gpt-5o-chatbot.git
-cd gpt-5o-chatbot
+git clone https://github.com/CufoTv/GPT-UI.git
+cd GPT-UI
 ```
 
 2. Open `index.html` in your browser.
