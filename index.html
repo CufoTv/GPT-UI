@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GPT-5o ChatBot (Demo)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- Material icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Left: auth / profile / admin -->
+    <aside class="sidebar">
+      <div class="brand">
+        <h2>GPT-5o</h2>
+        <p class="subtitle">Chat demo</p>
+      </div>
+
+      <div id="auth-container">
+        <!-- Login form -->
+        <div id="login-form" class="auth-box">
+          <h3>Login</h3>
+          <input id="login-email" placeholder="Email" type="email" />
+          <input id="login-pass" placeholder="Password" type="password" />
+          <button id="login-btn">Login</button>
+          <p class="small">No account? <a href="#" id="show-signup">Sign up</a></p>
+        </div>
+
+        <!-- Signup -->
+        <div id="signup-form" class="auth-box hidden">
+          <h3>Sign up</h3>
+          <input id="signup-name" placeholder="Full name" type="text" />
+          <input id="signup-email" placeholder="Email" type="email" />
+          <input id="signup-pass" placeholder="Password" type="password" />
+          <button id="signup-btn">Create account</button>
+          <p class="small">Have account? <a href="#" id="show-login">Login</a></p>
+        </div>
+      </div>
+
+      <div id="profile-panel" class="hidden">
+        <div class="profile">
+          <img src="profile/user.jpg" alt="avatar" />
+          <div>
+            <div id="welcome-line">Welcome, User</div>
+            <div id="email-line" class="small dim"></div>
+          </div>
+        </div>
+
+        <div class="model-block">
+          <label>Active model:</label>
+          <div class="model-controls">
+            <select id="model-select">
+              <option value="GPT-5o">GPT-5o</option>
+              <option value="GPT-5o-mini">GPT-5o-mini</option>
+            </select>
+            <button id="logout-btn" class="btn-ghost">Logout</button>
+          </div>
+          <div class="small dim">Free: 20 messages/hour on GPT-5o, auto-switch to GPT-5o-mini after limit. Paid: unlimited and can switch anytime.</div>
+        </div>
+
+        <div id="admin-panel" class="hidden">
+          <h4>Admin</h4>
+          <div>Make user paid (by email):</div>
+          <input id="admin-user-email" placeholder="user email" />
+          <button id="admin-mark-paid">Mark Paid</button>
+          <div class="small dim">Seed admin: admin@gmail.com / Admin123</div>
+        </div>
+
+        <div id="usage-stats" class="stats">
+          <div>Messages this hour: <span id="msg-count">0</span></div>
+          <div>Model: <span id="current-model-display">GPT-5o</span></div>
+        </div>
+
+        <div class="small dim" style="margin-top:12px;">
+          App stores signups in this browser (localStorage). To persist to a server you'd need a backend.
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right: chat -->
+    <main class="main">
+      <div class="chat-container"></div>
+
+      <div class="typing-container">
+        <div class="typing-content">
+          <div class="typing-textarea">
+            <textarea id="chat-input" spellcheck="false" placeholder="Ask a question..." required></textarea>
+            <span id="send-btn" class="material-symbols-rounded">send</span>
+          </div>
+          <div class="typing-controls">
+            <span id="theme-btn" class="material-symbols-rounded">light_mode</span>
+            <span id="delete-btn" class="material-symbols-rounded">delete</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
