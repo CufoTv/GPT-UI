@@ -6,7 +6,373 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <!-- Material icons -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <styles>/* ==============================================
+   Reset & Base Styles
+============================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  scroll-behavior: smooth;
+  transition: background 0.3s, color 0.3s;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #1e1e2f, #2c2c3e);
+  color: #fff;
+  padding: 10px;
+  overflow-x: hidden;
+}
+
+body.light-mode {
+  background: linear-gradient(135deg, #f2f2f2, #ffffff);
+  color: #222;
+}
+
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; outline: none; border: none; }
+
+/* ==============================================
+   Chat App Container
+============================================== */
+.chat-app {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 950px;
+  height: 95vh;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #2c2c3e, #1e1e2f);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  transition: all 0.3s ease;
+  animation: fadeIn 0.6s ease forwards;
+}
+
+body.light-mode .chat-app {
+  background: linear-gradient(135deg, #fff, #f0f0f0);
+}
+
+/* ==============================================
+   Profile Panel & Admin Panel
+============================================== */
+#profile-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: #3b3b55;
+  border-bottom: 1px solid #444;
+  transition: all 0.3s ease;
+  animation: slideDown 0.3s ease forwards;
+}
+
+body.light-mode #profile-panel {
+  background: #eaeaea;
+  color: #222;
+}
+
+#profile-panel span {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+#admin-panel {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+#admin-panel input,
+#admin-panel button {
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+#admin-panel input:focus {
+  box-shadow: 0 0 10px #6c9cff;
+}
+
+#admin-panel button {
+  background: #ff7f50;
+  color: #fff;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+#admin-panel button:hover {
+  background: #ff956a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255,127,80,0.5);
+}
+
+/* ==============================================
+   Chat Container
+============================================== */
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  overflow-y: auto;
+  background: #1f1f2c;
+  border-radius: 0;
+  transition: all 0.3s ease;
+  scrollbar-width: thin;
+}
+
+body.light-mode .chat-container {
+  background: #f9f9f9;
+}
+
+/* Custom Scrollbar Desktop */
+.chat-container::-webkit-scrollbar {
+  width: 10px;
+}
+.chat-container::-webkit-scrollbar-track {
+  background: #2c2c3e;
+  border-radius: 5px;
+}
+.chat-container::-webkit-scrollbar-thumb {
+  background: #6c9cff;
+  border-radius: 5px;
+}
+body.light-mode .chat-container::-webkit-scrollbar-track { background: #eee; }
+body.light-mode .chat-container::-webkit-scrollbar-thumb { background: #84aaff; }
+
+/* ==============================================
+   Chat Bubbles
+============================================== */
+.chat {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  opacity: 0;
+  animation: fadeInUp 0.5s forwards;
+}
+
+.chat.outgoing {
+  flex-direction: row-reverse;
+}
+
+.bubble {
+  max-width: 70%;
+  padding: 14px 22px;
+  border-radius: 25px;
+  background: #4c4c6a;
+  color: #fff;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+body.light-mode .bubble { background: #d9d9ff; color: #222; }
+.chat.outgoing .bubble { background: #6c9cff; }
+
+.chat:hover .bubble {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(108,156,255,0.4);
+}
+
+.chat img.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.chat img.avatar:hover { transform: scale(1.05); }
+
+/* ==============================================
+   Typing Animation
+============================================== */
+.typing-animation {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  height: 18px;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  animation: typing 1s infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+body.light-mode .typing-dot { background: #222; }
+
+@keyframes typing {
+  0%,60%,100% { transform: translateY(0); opacity: 0.3; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* ==============================================
+   Input Area
+============================================== */
+.input-area {
+  display: flex;
+  gap: 10px;
+  padding: 15px;
+  background: #2c2c3e;
+  border-top: 1px solid #444;
+  transition: all 0.3s ease;
+}
+
+body.light-mode .input-area { background: #eee; }
+
+.input-area input {
+  flex: 1;
+  padding: 14px 18px;
+  border-radius: 25px;
+  border: none;
+  background: rgba(255,255,255,0.05);
+  color: inherit;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.input-area input:focus {
+  background: rgba(255,255,255,0.15);
+  box-shadow: 0 0 8px #6c9cff;
+}
+
+body.light-mode .input-area input { background: rgba(0,0,0,0.05); }
+
+.input-area button {
+  padding: 12px 24px;
+  border-radius: 25px;
+  background: #6c9cff;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.input-area button:hover {
+  transform: translateY(-2px);
+  background: #84aaff;
+  box-shadow: 0 4px 15px rgba(108,156,255,0.5);
+}
+
+/* ==============================================
+   Default Text
+============================================== */
+.default-text {
+  text-align: center;
+  opacity: 0.6;
+  animation: fadeIn 0.5s ease forwards;
+}
+
+/* ==============================================
+   Animations & Shadows
+============================================== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ==============================================
+   Responsive & Mobile-First
+============================================== */
+@media (max-width: 1024px) {
+  .chat-app { max-width: 90%; }
+  .bubble { max-width: 75%; font-size: 0.95rem; }
+}
+
+@media (max-width: 768px) {
+  .chat-app { height: 90vh; }
+  #profile-panel { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .bubble { max-width: 80%; }
+}
+
+@media (max-width: 480px) {
+  .chat-app { width: 100%; height: 95vh; border-radius: 15px; }
+  .bubble { max-width: 90%; font-size: 0.9rem; }
+  .input-area input { font-size: 0.95rem; }
+  .input-area button { font-size: 0.95rem; padding: 10px 18px; }
+  #admin-panel input, #admin-panel button { font-size: 0.9rem; }
+}
+
+/* ==============================================
+   Animated Background Gradient
+============================================== */
+body {
+  background: linear-gradient(-45deg, #1e1e2f, #2c2c3e, #3b3b55, #2c2c3e);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ==============================================
+   Extra UX Microinteractions
+============================================== */
+.bubble::after {
+  content: "";
+  position: absolute;
+  width: 10px; height: 10px;
+  background: inherit;
+  bottom: -5px;
+  left: 10px;
+  clip-path: polygon(50% 0, 0% 100%, 100% 100%);
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.chat.outgoing .bubble::after {
+  left: auto; right: 10px;
+}
+
+.chat:hover .bubble::after {
+  transform: translateY(-2px);
+}
+
+#model-select {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #444;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+#model-select:hover { box-shadow: 0 0 10px #6c9cff; }
+body.light-mode #model-select { background: #ddd; color: #222; }
+
+/* ====== END OF RESPONSIVE, DYNAMIC, ANIMATED UX/UI ====== */</styles>
 </head>
 <body>
   <div id="app">
