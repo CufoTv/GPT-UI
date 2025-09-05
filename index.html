@@ -3,22 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPT-5o ChatBot - Complete System</title>
+    <title>GPT-5o ChatBot - Advanced Processing System</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <style>
         * {
             scroll-behavior: smooth;
-        }
-        
-        .chat-container {
-            height: calc(100vh - 200px);
-            overflow-y: auto;
-        }
-        
-        .sidebar {
-            height: 100vh;
-            overflow-y: auto;
         }
         
         .typing-animation {
@@ -39,8 +29,18 @@
             to { transform: translateY(0); opacity: 1; }
         }
         
-        .payment-modal {
-            backdrop-filter: blur(10px);
+        .processing-stage {
+            transition: all 0.5s ease;
+        }
+        
+        .processing-stage.active {
+            background: linear-gradient(45deg, #10B981, #3B82F6);
+            color: white;
+        }
+        
+        .markov-progress {
+            width: 0%;
+            transition: width 0.8s ease;
         }
         
         .glass-effect {
@@ -49,254 +49,234 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        .scrollbar-thin {
-            scrollbar-width: thin;
+        .mobile-sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
         }
         
-        .scrollbar-thin::-webkit-scrollbar {
-            width: 6px;
+        .mobile-sidebar.open {
+            transform: translateX(0);
         }
         
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-            background: rgba(156, 163, 175, 0.5);
-            border-radius: 3px;
+        .chat-message {
+            max-width: calc(100% - 2rem);
+        }
+        
+        @media (min-width: 768px) {
+            .chat-message {
+                max-width: 70%;
+            }
+        }
+        
+        .processing-indicator {
+            background: linear-gradient(45deg, #EF4444, #F59E0B, #10B981, #3B82F6, #8B5CF6);
+            background-size: 200% 200%;
+            animation: gradientShift 2s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .json-indicator {
+            position: fixed;
+            top: 4px;
+            right: 4px;
+            z-index: 1000;
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .mobile-optimized {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .content-area {
+            flex: 1;
+            overflow: visible;
         }
         
         @media print {
-            .sidebar { display: none !important; }
-            .chat-container { height: auto !important; overflow: visible !important; }
             .no-print { display: none !important; }
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white">
-    <!-- Payment Modal -->
-    <div id="paymentModal" class="fixed inset-0 z-50 hidden payment-modal bg-black bg-opacity-50 flex items-center justify-center">
-        <div class="bg-gray-800 p-8 rounded-xl max-w-md w-full mx-4">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold">Upgrade to Premium</h2>
-                <button id="closePayment" class="text-gray-400 hover:text-white">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="mb-6">
-                <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-lg mb-4">
-                    <h3 class="font-bold text-lg">Premium Plan - $19.99/month</h3>
-                    <ul class="text-sm mt-2 space-y-1">
-                        <li>✓ Unlimited messages</li>
-                        <li>✓ Access to GPT-5o premium model</li>
-                        <li>✓ Priority response times</li>
-                        <li>✓ Export conversations</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <form id="paymentForm">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Card Number</label>
-                        <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" 
-                               class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-                               maxlength="19" required>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Expiry Date</label>
-                            <input type="text" id="expiryDate" placeholder="MM/YY" 
-                                   class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-                                   maxlength="5" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">CVC</label>
-                            <input type="text" id="cvc" placeholder="123" 
-                                   class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-                                   maxlength="4" required>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Cardholder Name</label>
-                        <input type="text" id="cardName" placeholder="John Doe" 
-                               class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-                               required>
-                    </div>
-                    
-                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 p-3 rounded-lg font-semibold transition-all">
-                        Subscribe for $19.99/month
-                    </button>
-                </div>
-            </form>
-        </div>
+<body class="bg-gray-900 text-white mobile-optimized">
+    <!-- JSON Status Indicator -->
+    <div class="json-indicator no-print">
+        <i class="fas fa-database mr-1"></i>JSON Ready
     </div>
 
-    <div class="flex h-screen">
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between no-print">
+        <button id="mobileMenuBtn" class="text-white">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+        <div class="flex items-center space-x-2">
+            <div class="w-6 h-6 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-robot text-white text-xs"></i>
+            </div>
+            <h1 class="text-lg font-bold">GPT-5o</h1>
+        </div>
+        <div id="mobileProcessingIndicator" class="w-6 h-6 rounded-full bg-gray-600"></div>
+    </div>
+
+    <div class="flex flex-1">
         <!-- Sidebar -->
-        <div class="w-80 bg-gray-800 border-r border-gray-700 sidebar no-print">
+        <div id="sidebar" class="w-80 md:w-72 lg:w-80 bg-gray-800 border-r border-gray-700 mobile-sidebar md:relative md:transform-none fixed inset-y-0 left-0 z-50 md:z-auto no-print">
             <!-- Logo -->
-            <div class="p-6 border-b border-gray-700">
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-robot text-white"></i>
+            <div class="p-4 md:p-6 border-b border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                        <h1 class="text-xl font-bold">GPT-5o</h1>
                     </div>
-                    <h1 class="text-xl font-bold">GPT-5o</h1>
+                    <button id="closeMobileMenu" class="md:hidden text-gray-400">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- Auth Section -->
-            <div id="authSection" class="p-6">
-                <!-- Login Form -->
-                <div id="loginForm" class="space-y-4">
-                    <h2 class="text-lg font-semibold mb-4">Sign In</h2>
-                    <input type="email" id="loginEmail" placeholder="Email" 
-                           class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
-                    <input type="password" id="loginPassword" placeholder="Password" 
-                           class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
-                    <button id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg font-semibold transition-colors">
-                        Sign In
-                    </button>
-                    <p class="text-sm text-gray-400 text-center">
-                        Don't have an account? <button id="showSignup" class="text-blue-400 hover:underline">Sign up</button>
-                    </p>
+            <!-- Processing Status -->
+            <div class="p-4 border-b border-gray-700">
+                <h3 class="text-sm font-semibold mb-3 text-gray-300">Processing Pipeline</h3>
+                <div class="space-y-2" id="processingStages">
+                    <div class="processing-stage p-2 rounded bg-gray-700 text-xs">
+                        <i class="fas fa-search mr-2"></i>Stage 1: Query Analysis
+                    </div>
+                    <div class="processing-stage p-2 rounded bg-gray-700 text-xs">
+                        <i class="fas fa-database mr-2"></i>Stage 2: JSON Matching
+                    </div>
+                    <div class="processing-stage p-2 rounded bg-gray-700 text-xs">
+                        <i class="fas fa-brain mr-2"></i>Stage 3: Markov Chain
+                    </div>
+                    <div class="processing-stage p-2 rounded bg-gray-700 text-xs">
+                        <i class="fas fa-cogs mr-2"></i>Stage 4: Response Generation
+                    </div>
+                    <div class="processing-stage p-2 rounded bg-gray-700 text-xs">
+                        <i class="fas fa-check mr-2"></i>Stage 5: Output Refinement
+                    </div>
                 </div>
-
-                <!-- Signup Form -->
-                <div id="signupForm" class="space-y-4 hidden">
-                    <h2 class="text-lg font-semibold mb-4">Create Account</h2>
-                    <input type="text" id="signupUsername" placeholder="Username" 
-                           class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
-                    <input type="email" id="signupEmail" placeholder="Email" 
-                           class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
-                    <input type="password" id="signupPassword" placeholder="Password" 
-                           class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
-                    <button id="signupBtn" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-lg font-semibold transition-colors">
-                        Create Account
-                    </button>
-                    <p class="text-sm text-gray-400 text-center">
-                        Already have an account? <button id="showLogin" class="text-blue-400 hover:underline">Sign in</button>
-                    </p>
+                <div class="mt-3">
+                    <div class="bg-gray-700 rounded-full h-2">
+                        <div id="markovProgress" class="markov-progress bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full"></div>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1" id="progressText">Ready</div>
                 </div>
             </div>
 
             <!-- User Profile -->
-            <div id="userProfile" class="p-6 border-b border-gray-700 hidden">
-                <div class="flex items-center space-x-3 mb-4">
-                    <img id="userAvatar" src="profile/user.jpg" alt="User" class="w-10 h-10 rounded-full">
+            <div class="p-4 border-b border-gray-700">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
                     <div>
-                        <div id="userName" class="font-semibold"></div>
-                        <div id="userEmail" class="text-sm text-gray-400"></div>
+                        <div class="font-semibold text-sm">User</div>
+                        <div class="text-xs text-gray-400">Advanced Mode</div>
                     </div>
                 </div>
                 
-                <!-- Plan Info -->
-                <div id="planInfo" class="mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm text-gray-400">Plan:</span>
-                        <span id="currentPlan" class="text-sm font-semibold">Free</span>
-                    </div>
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm text-gray-400">Messages:</span>
-                        <span id="messageCount" class="text-sm">0/20</span>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-2 mb-3">
-                        <div id="messageProgress" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
-                    </div>
-                </div>
-
                 <!-- Model Selection -->
-                <div class="mb-4">
-                    <label class="block text-sm text-gray-400 mb-2">Model:</label>
-                    <select id="modelSelect" class="w-full p-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
-                        <option value="gpt-5o-mini">GPT-5o Mini (Free)</option>
-                        <option value="gpt-5o" disabled>GPT-5o Premium (Paid)</option>
+                <div class="mb-3">
+                    <label class="block text-xs text-gray-400 mb-2">Model:</label>
+                    <select id="modelSelect" class="w-full p-2 bg-gray-700 rounded border border-gray-600 focus:border-blue-500 focus:outline-none text-sm">
+                        <option value="gpt-5o-mini">GPT-5o Mini (Fast)</option>
+                        <option value="gpt-5o" selected>GPT-5o Advanced (Smart)</option>
                     </select>
                 </div>
 
-                <!-- Upgrade Button -->
-                <button id="upgradeBtn" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 p-3 rounded-lg font-semibold transition-all mb-4">
-                    <i class="fas fa-crown mr-2"></i>Upgrade to Premium
-                </button>
-
-                <button id="logoutBtn" class="w-full bg-gray-600 hover:bg-gray-700 p-2 rounded-lg text-sm transition-colors">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                </button>
-            </div>
-
-            <!-- Admin Panel -->
-            <div id="adminPanel" class="p-6 border-b border-gray-700 hidden">
-                <h3 class="text-lg font-semibold mb-4">Admin Panel</h3>
-                <div class="space-y-3">
-                    <input type="email" id="adminUserEmail" placeholder="User email" 
-                           class="w-full p-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none text-sm">
-                    <button id="makePaidBtn" class="w-full bg-green-600 hover:bg-green-700 p-2 rounded-lg text-sm font-semibold transition-colors">
-                        Make User Paid
-                    </button>
-                    <div class="text-xs text-gray-400">
-                        Seed admin: admin@gmail.com / Admin123
+                <!-- JSON Status -->
+                <div class="mb-3">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-400">JSON Database:</span>
+                        <span id="jsonStatus" class="text-green-400">
+                            <i class="fas fa-check-circle mr-1"></i>Connected
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs mt-1">
+                        <span class="text-gray-400">Records:</span>
+                        <span id="recordCount" class="text-blue-400">1,247</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Usage Stats -->
-            <div id="usageStats" class="p-6 hidden">
-                <h3 class="text-sm font-semibold mb-3 text-gray-400">Usage Statistics</h3>
-                <div class="space-y-2 text-sm">
+            <!-- Statistics -->
+            <div class="p-4">
+                <h3 class="text-xs font-semibold mb-3 text-gray-400">Session Stats</h3>
+                <div class="space-y-2 text-xs">
                     <div class="flex justify-between">
-                        <span>Today:</span>
-                        <span id="todayMessages">0 messages</span>
+                        <span class="text-gray-400">Messages:</span>
+                        <span id="messageCount">0</span>
                     </div>
                     <div class="flex justify-between">
-                        <span>This Hour:</span>
-                        <span id="hourMessages">0 messages</span>
+                        <span class="text-gray-400">Accuracy:</span>
+                        <span id="accuracyRate" class="text-green-400">98.5%</span>
                     </div>
                     <div class="flex justify-between">
-                        <span>Current Model:</span>
-                        <span id="currentModel">GPT-5o Mini</span>
+                        <span class="text-gray-400">Avg Response:</span>
+                        <span id="avgResponse" class="text-blue-400">2.3s</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Main Chat Area -->
-        <div class="flex-1 flex flex-col">
+        <div class="flex-1 flex flex-col content-area">
             <!-- Chat Header -->
-            <div class="bg-gray-800 border-b border-gray-700 p-4 no-print">
+            <div class="bg-gray-800 border-b border-gray-700 p-3 md:p-4 no-print">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
-                        <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-8 h-8 rounded-full">
+                        <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
                         <div>
-                            <div class="font-semibold">GPT-5o Assistant</div>
-                            <div class="text-xs text-gray-400">AI-powered chat assistant</div>
+                            <div class="font-semibold text-sm md:text-base">GPT-5o Assistant</div>
+                            <div class="text-xs text-gray-400">Advanced AI with Markov Processing</div>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <button id="exportBtn" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg text-sm transition-colors">
-                            <i class="fas fa-download mr-2"></i>Export
-                        </button>
-                        <button id="clearChatBtn" class="bg-red-600 hover:bg-red-700 px-3 py-2 rounded-lg text-sm transition-colors">
-                            <i class="fas fa-trash mr-2"></i>Clear
+                    <div class="flex items-center space-x-2">
+                        <div id="processingIndicator" class="w-3 h-3 rounded-full bg-gray-600"></div>
+                        <button id="clearChatBtn" class="bg-red-600 hover:bg-red-700 px-2 py-1 md:px-3 md:py-2 rounded text-xs md:text-sm transition-colors">
+                            <i class="fas fa-trash mr-1"></i>Clear
                         </button>
                     </div>
                 </div>
             </div>
 
             <!-- Chat Messages -->
-            <div id="chatContainer" class="flex-1 overflow-y-auto p-6 space-y-4 chat-container scrollbar-thin">
-                <div id="welcomeMessage" class="text-center py-12">
-                    <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-16 h-16 rounded-full mx-auto mb-4">
-                    <h2 class="text-2xl font-bold mb-2">Welcome to GPT-5o</h2>
-                    <p class="text-gray-400">Start a conversation with our AI assistant</p>
+            <div id="chatContainer" class="flex-1 p-3 md:p-6 space-y-4 overflow-visible">
+                <div id="welcomeMessage" class="text-center py-8 md:py-12">
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-lg md:text-2xl"></i>
+                    </div>
+                    <h2 class="text-xl md:text-2xl font-bold mb-2">Welcome to GPT-5o Advanced</h2>
+                    <p class="text-gray-400 text-sm md:text-base mb-4">AI-powered assistant with 5-stage Markov chain processing</p>
+                    <div class="flex flex-wrap justify-center gap-2 text-xs">
+                        <span class="bg-green-600 px-2 py-1 rounded">JSON Database</span>
+                        <span class="bg-blue-600 px-2 py-1 rounded">Markov Chain</span>
+                        <span class="bg-purple-600 px-2 py-1 rounded">Smart Matching</span>
+                    </div>
                 </div>
             </div>
 
             <!-- Chat Input -->
-            <div class="bg-gray-800 border-t border-gray-700 p-4 no-print">
-                <div class="flex items-center space-x-3">
+            <div class="bg-gray-800 border-t border-gray-700 p-3 md:p-4 no-print">
+                <div class="flex items-end space-x-2 md:space-x-3">
                     <div class="flex-1 relative">
                         <textarea id="chatInput" 
-                                placeholder="Type your message here..." 
-                                class="w-full p-3 pr-12 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none resize-none"
+                                placeholder="Ask me anything..." 
+                                class="w-full p-3 pr-12 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none resize-none text-sm md:text-base"
                                 rows="1"></textarea>
                         <button id="sendBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
                             <i class="fas fa-paper-plane text-sm"></i>
@@ -304,156 +284,129 @@
                     </div>
                 </div>
                 <div class="flex justify-between text-xs text-gray-400 mt-2">
-                    <span>Press Enter to send, Shift+Enter for new line</span>
+                    <span>Enhanced with JSON knowledge base</span>
                     <span id="inputCounter">0/1000</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Initialize data structure
-        const defaultData = {
-            users: [
-                {
-                    username: "admin",
-                    email: "admin@gmail.com",
-                    password: "Admin123",
-                    role: "admin",
-                    plan: "paid",
-                    messageCount: 0,
-                    lastReset: Date.now(),
-                    createdAt: Date.now()
-                },
-                {
-                    username: "testuser",
-                    email: "testuser@example.com",
-                    password: "Test123",
-                    role: "user",
-                    plan: "free",
-                    messageCount: 0,
-                    lastReset: Date.now(),
-                    createdAt: Date.now()
-                }
-            ]
-        };
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden no-print"></div>
 
-        // Sample QA data for the chatbot
-        const qaData = {
-            "hello": "Hello! I'm GPT-5o, your AI assistant. How can I help you today?",
-            "hi": "Hi there! What would you like to chat about?",
-            "how are you": "I'm doing great, thank you for asking! I'm here and ready to help you with any questions or tasks you might have.",
-            "what can you do": "I can help you with a wide variety of tasks including answering questions, writing, analysis, coding, creative projects, and much more. What would you like assistance with?",
-            "weather": "I don't have access to real-time weather data, but I'd be happy to help you find weather information or discuss weather-related topics!",
-            "default": "That's an interesting question! I'd be happy to help you explore that topic further. Could you provide more details about what you're looking for?"
+    <script>
+        // Mock GPT-5o JSON Database
+        const gptDatabase = {
+            "version": "5.0.1",
+            "total_records": 1247,
+            "categories": {
+                "general": [
+                    {
+                        "id": 1,
+                        "question": "what is artificial intelligence",
+                        "answer": "Artificial Intelligence (AI) is a branch of computer science that aims to create intelligent machines that work and react like humans. It involves machine learning, natural language processing, computer vision, and robotics to solve complex problems and automate tasks.",
+                        "confidence": 0.95,
+                        "keywords": ["ai", "artificial", "intelligence", "machine", "learning", "computer", "science"],
+                        "related_topics": ["machine learning", "deep learning", "neural networks"]
+                    },
+                    {
+                        "id": 2,
+                        "question": "how does machine learning work",
+                        "answer": "Machine learning is a subset of AI that enables computers to learn and make decisions from data without being explicitly programmed for every scenario. It uses algorithms to identify patterns in data, make predictions, and improve performance over time through experience.",
+                        "confidence": 0.92,
+                        "keywords": ["machine", "learning", "algorithm", "data", "pattern", "prediction"],
+                        "related_topics": ["supervised learning", "unsupervised learning", "reinforcement learning"]
+                    },
+                    {
+                        "id": 3,
+                        "question": "what is deep learning",
+                        "answer": "Deep learning is a subset of machine learning that uses artificial neural networks with multiple layers to model and understand complex patterns in data. It's particularly effective for tasks like image recognition, natural language processing, and speech recognition.",
+                        "confidence": 0.94,
+                        "keywords": ["deep", "learning", "neural", "networks", "layers", "patterns"],
+                        "related_topics": ["neural networks", "backpropagation", "convolutional networks"]
+                    }
+                ],
+                "technology": [
+                    {
+                        "id": 4,
+                        "question": "what is cloud computing",
+                        "answer": "Cloud computing is the delivery of computing services including servers, storage, databases, networking, software, analytics, and intelligence over the Internet ('the cloud') to offer faster innovation, flexible resources, and economies of scale.",
+                        "confidence": 0.96,
+                        "keywords": ["cloud", "computing", "internet", "services", "storage", "server"],
+                        "related_topics": ["AWS", "Azure", "Google Cloud", "SaaS", "IaaS", "PaaS"]
+                    },
+                    {
+                        "id": 5,
+                        "question": "what is blockchain technology",
+                        "answer": "Blockchain is a distributed ledger technology that maintains a continuously growing list of records, called blocks, which are linked and secured using cryptography. It's the technology behind cryptocurrencies like Bitcoin and has applications in supply chain, healthcare, and more.",
+                        "confidence": 0.93,
+                        "keywords": ["blockchain", "ledger", "cryptocurrency", "bitcoin", "security", "distributed"],
+                        "related_topics": ["cryptocurrency", "smart contracts", "decentralized finance"]
+                    }
+                ],
+                "science": [
+                    {
+                        "id": 6,
+                        "question": "what is quantum computing",
+                        "answer": "Quantum computing is a type of computation that harnesses the phenomena of quantum mechanics to process information. Unlike classical computers that use bits (0 or 1), quantum computers use quantum bits or qubits that can exist in multiple states simultaneously.",
+                        "confidence": 0.91,
+                        "keywords": ["quantum", "computing", "qubits", "mechanics", "superposition", "bits"],
+                        "related_topics": ["quantum mechanics", "superposition", "entanglement"]
+                    }
+                ]
+            }
         };
 
         // Application state
-        let currentUser = null;
         let chatHistory = [];
-        let isTyping = false;
+        let isProcessing = false;
+        let messageCounter = 0;
+        let processingStartTime = 0;
 
         // DOM elements
-        const authSection = document.getElementById('authSection');
-        const loginForm = document.getElementById('loginForm');
-        const signupForm = document.getElementById('signupForm');
-        const userProfile = document.getElementById('userProfile');
-        const adminPanel = document.getElementById('adminPanel');
-        const usageStats = document.getElementById('usageStats');
-        const paymentModal = document.getElementById('paymentModal');
+        const sidebar = document.getElementById('sidebar');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const closeMobileMenu = document.getElementById('closeMobileMenu');
         const chatContainer = document.getElementById('chatContainer');
         const chatInput = document.getElementById('chatInput');
         const sendBtn = document.getElementById('sendBtn');
+        const processingStages = document.querySelectorAll('.processing-stage');
+        const markovProgress = document.getElementById('markovProgress');
+        const progressText = document.getElementById('progressText');
+        const processingIndicator = document.getElementById('processingIndicator');
+        const mobileProcessingIndicator = document.getElementById('mobileProcessingIndicator');
 
         // Initialize application
         function init() {
-            // Load or initialize data
-            if (!localStorage.getItem('chatAppData')) {
-                localStorage.setItem('chatAppData', JSON.stringify(defaultData));
-            }
-
-            // Load current user session
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showUserInterface();
-            }
-
-            // Setup event listeners
             setupEventListeners();
-            
-            // Setup chat input
             setupChatInput();
-
-            // Reset message counts if needed
-            resetMessageCountsIfNeeded();
+            updateStats();
+            
+            // Simulate JSON loading
+            setTimeout(() => {
+                document.getElementById('jsonStatus').innerHTML = '<i class="fas fa-check-circle mr-1"></i>Connected';
+            }, 1000);
         }
 
         function setupEventListeners() {
-            // Auth form toggles
-            document.getElementById('showSignup').addEventListener('click', () => {
-                loginForm.classList.add('hidden');
-                signupForm.classList.remove('hidden');
+            // Mobile menu
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.add('open');
+                mobileOverlay.classList.remove('hidden');
             });
 
-            document.getElementById('showLogin').addEventListener('click', () => {
-                signupForm.classList.add('hidden');
-                loginForm.classList.remove('hidden');
-            });
+            closeMobileMenu.addEventListener('click', closeMobileMenu_);
+            mobileOverlay.addEventListener('click', closeMobileMenu_);
 
-            // Auth buttons
-            document.getElementById('loginBtn').addEventListener('click', handleLogin);
-            document.getElementById('signupBtn').addEventListener('click', handleSignup);
-            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-
-            // Chat buttons
-            document.getElementById('sendBtn').addEventListener('click', handleSendMessage);
+            // Chat
+            sendBtn.addEventListener('click', handleSendMessage);
             document.getElementById('clearChatBtn').addEventListener('click', clearChat);
-            document.getElementById('exportBtn').addEventListener('click', exportChat);
-
-            // Payment modal
-            document.getElementById('upgradeBtn').addEventListener('click', () => {
-                paymentModal.classList.remove('hidden');
-            });
-            
-            document.getElementById('closePayment').addEventListener('click', () => {
-                paymentModal.classList.add('hidden');
-            });
-
-            document.getElementById('paymentForm').addEventListener('submit', handlePayment);
-
-            // Admin functions
-            document.getElementById('makePaidBtn').addEventListener('click', handleMakeUserPaid);
-
-            // Model selection
-            document.getElementById('modelSelect').addEventListener('change', handleModelChange);
-
-            // Input formatting
-            setupInputFormatting();
         }
 
-        function setupInputFormatting() {
-            const cardNumber = document.getElementById('cardNumber');
-            const expiryDate = document.getElementById('expiryDate');
-            const cvc = document.getElementById('cvc');
-
-            cardNumber.addEventListener('input', (e) => {
-                let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
-                let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-                e.target.value = formattedValue;
-            });
-
-            expiryDate.addEventListener('input', (e) => {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length >= 2) {
-                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
-                }
-                e.target.value = value;
-            });
-
-            cvc.addEventListener('input', (e) => {
-                e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            });
+        function closeMobileMenu_() {
+            sidebar.classList.remove('open');
+            mobileOverlay.classList.add('hidden');
         }
 
         function setupChatInput() {
@@ -478,154 +431,11 @@
             });
         }
 
-        function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            if (!email || !password) {
-                alert('Please fill in both email and password');
-                return;
-            }
-
-            const data = JSON.parse(localStorage.getItem('chatAppData'));
-            const user = data.users.find(u => u.email === email && u.password === password);
-
-            if (user) {
-                currentUser = user;
-                localStorage.setItem('currentUser', JSON.stringify(user));
-                showUserInterface();
-            } else {
-                alert('Invalid email or password');
-            }
-        }
-
-        function handleSignup() {
-            const username = document.getElementById('signupUsername').value;
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-
-            if (!username || !email || !password) {
-                alert('Please fill in all fields');
-                return;
-            }
-
-            const data = JSON.parse(localStorage.getItem('chatAppData'));
-            
-            // Check if user already exists
-            if (data.users.find(u => u.email === email)) {
-                alert('User with this email already exists');
-                return;
-            }
-
-            // Create new user
-            const newUser = {
-                username,
-                email,
-                password,
-                role: 'user',
-                plan: 'free',
-                messageCount: 0,
-                lastReset: Date.now(),
-                createdAt: Date.now()
-            };
-
-            data.users.push(newUser);
-            localStorage.setItem('chatAppData', JSON.stringify(data));
-
-            currentUser = newUser;
-            localStorage.setItem('currentUser', JSON.stringify(newUser));
-            showUserInterface();
-        }
-
-        function handleLogout() {
-            currentUser = null;
-            localStorage.removeItem('currentUser');
-            chatHistory = [];
-            showAuthInterface();
-            clearChat();
-        }
-
-        function showAuthInterface() {
-            authSection.classList.remove('hidden');
-            userProfile.classList.add('hidden');
-            adminPanel.classList.add('hidden');
-            usageStats.classList.add('hidden');
-        }
-
-        function showUserInterface() {
-            authSection.classList.add('hidden');
-            userProfile.classList.remove('hidden');
-            usageStats.classList.remove('hidden');
-
-            // Update user info
-            document.getElementById('userName').textContent = currentUser.username;
-            document.getElementById('userEmail').textContent = currentUser.email;
-            document.getElementById('currentPlan').textContent = currentUser.plan.charAt(0).toUpperCase() + currentUser.plan.slice(1);
-
-            // Show admin panel if admin
-            if (currentUser.role === 'admin') {
-                adminPanel.classList.remove('hidden');
-            }
-
-            // Update plan-specific UI
-            updatePlanUI();
-            updateUsageStats();
-            loadChatHistory();
-        }
-
-        function updatePlanUI() {
-            const modelSelect = document.getElementById('modelSelect');
-            const upgradeBtn = document.getElementById('upgradeBtn');
-
-            if (currentUser.plan === 'paid') {
-                modelSelect.querySelector('option[value="gpt-5o"]').disabled = false;
-                upgradeBtn.classList.add('hidden');
-            } else {
-                modelSelect.querySelector('option[value="gpt-5o"]').disabled = true;
-                upgradeBtn.classList.remove('hidden');
-                
-                // Check message limit
-                if (currentUser.messageCount >= 20) {
-                    modelSelect.value = 'gpt-5o-mini';
-                }
-            }
-
-            updateMessageProgress();
-        }
-
-        function updateMessageProgress() {
-            const messageCount = document.getElementById('messageCount');
-            const messageProgress = document.getElementById('messageProgress');
-
-            if (currentUser.plan === 'free') {
-                const count = currentUser.messageCount;
-                messageCount.textContent = `${count}/20`;
-                messageProgress.style.width = `${(count / 20) * 100}%`;
-            } else {
-                messageCount.textContent = 'Unlimited';
-                messageProgress.style.width = '100%';
-                messageProgress.classList.remove('bg-blue-600');
-                messageProgress.classList.add('bg-green-600');
-            }
-        }
-
-        function updateUsageStats() {
-            document.getElementById('todayMessages').textContent = `${currentUser.messageCount} messages`;
-            document.getElementById('hourMessages').textContent = `${currentUser.messageCount} messages`;
-            document.getElementById('currentModel').textContent = document.getElementById('modelSelect').value.toUpperCase();
-        }
-
-        function handleSendMessage() {
-            if (isTyping) return;
+        async function handleSendMessage() {
+            if (isProcessing) return;
 
             const message = chatInput.value.trim();
             if (!message) return;
-
-            // Check message limits for free users
-            if (currentUser.plan === 'free' && currentUser.messageCount >= 20) {
-                alert('You have reached your message limit. Please upgrade to premium for unlimited messages.');
-                return;
-            }
 
             // Add user message
             addMessage(message, 'user');
@@ -633,37 +443,38 @@
             chatInput.style.height = 'auto';
             document.getElementById('inputCounter').textContent = '0/1000';
 
-            // Increment message count
-            incrementMessageCount();
+            // Close mobile menu if open
+            closeMobileMenu_();
 
-            // Generate and show bot response
-            setTimeout(() => {
-                const response = generateResponse(message);
-                addBotMessageWithTyping(response);
-            }, 500);
+            // Process message through 5-stage pipeline
+            await processMessage(message);
         }
 
         function addMessage(message, sender) {
             const messageDiv = document.createElement('div');
-            messageDiv.classList.add('flex', 'message-bubble');
+            messageDiv.classList.add('flex', 'message-bubble', 'chat-message');
             
             if (sender === 'user') {
-                messageDiv.classList.add('justify-end');
+                messageDiv.classList.add('justify-end', 'ml-auto');
                 messageDiv.innerHTML = `
-                    <div class="flex items-end space-x-2 max-w-xs lg:max-w-md">
-                        <div class="bg-blue-600 text-white p-3 rounded-lg rounded-br-none">
+                    <div class="flex items-end space-x-2">
+                        <div class="bg-blue-600 text-white p-3 rounded-lg rounded-br-none max-w-full break-words">
                             ${message}
                         </div>
-                        <img src="profile/user.jpg" alt="User" class="w-8 h-8 rounded-full">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user text-white text-xs"></i>
+                        </div>
                     </div>
                 `;
             } else {
-                messageDiv.classList.add('justify-start');
+                messageDiv.classList.add('justify-start', 'mr-auto');
                 messageDiv.innerHTML = `
-                    <div class="flex items-end space-x-2 max-w-xs lg:max-w-md">
-                        <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-8 h-8 rounded-full">
-                        <div class="bg-gray-700 text-white p-3 rounded-lg rounded-bl-none">
-                            <div class="typing-text"></div>
+                    <div class="flex items-end space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-robot text-white text-xs"></i>
+                        </div>
+                        <div class="bg-gray-700 text-white p-3 rounded-lg rounded-bl-none max-w-full break-words">
+                            <div class="typing-text">${message}</div>
                         </div>
                     </div>
                 `;
@@ -676,302 +487,342 @@
             }
 
             chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Scroll to bottom on mobile
+            if (window.innerWidth < 768) {
+                setTimeout(() => {
+                    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }, 100);
+            }
 
             // Save to history
             chatHistory.push({ message, sender, timestamp: Date.now() });
-            saveChatHistory();
+            messageCounter++;
+            updateStats();
         }
 
-        function addBotMessageWithTyping(message) {
-            isTyping = true;
+        async function processMessage(userMessage) {
+            isProcessing = true;
+            processingStartTime = Date.now();
+            updateProcessingIndicators(true);
+
+            // Stage 1: Query Analysis
+            await updateStage(0, "Analyzing query structure and intent...");
+            await sleep(800);
+
+            // Stage 2: JSON Matching
+            await updateStage(1, "Searching JSON database for matches...");
+            const matches = await searchDatabase(userMessage);
+            await sleep(1000);
+
+            // Stage 3: Markov Chain Processing
+            await updateStage(2, "Processing with Markov chain algorithm...");
+            const markovResult = await processMarkovChain(matches, userMessage);
+            await sleep(1200);
+
+            // Stage 4: Response Generation
+            await updateStage(3, "Generating optimized response...");
+            const response = await generateResponse(markovResult, userMessage);
+            await sleep(600);
+
+            // Stage 5: Output Refinement
+            await updateStage(4, "Refining and finalizing output...");
+            const finalResponse = await refineResponse(response);
+            await sleep(500);
+
+            // Complete processing
+            resetProcessingStages();
+            updateProcessingIndicators(false);
             
-            // Create message container
+            // Add bot response with typing effect
+            await addBotMessageWithTyping(finalResponse);
+            
+            isProcessing = false;
+            updateStats();
+        }
+
+        async function updateStage(stageIndex, message) {
+            // Reset all stages
+            processingStages.forEach((stage, index) => {
+                if (index <= stageIndex) {
+                    stage.classList.add('active');
+                } else {
+                    stage.classList.remove('active');
+                }
+            });
+
+            // Update progress
+            const progress = ((stageIndex + 1) / 5) * 100;
+            markovProgress.style.width = `${progress}%`;
+            progressText.textContent = message;
+        }
+
+        function resetProcessingStages() {
+            processingStages.forEach(stage => {
+                stage.classList.remove('active');
+            });
+            markovProgress.style.width = '0%';
+            progressText.textContent = 'Complete';
+        }
+
+        function updateProcessingIndicators(isActive) {
+            const indicators = [processingIndicator, mobileProcessingIndicator];
+            indicators.forEach(indicator => {
+                if (isActive) {
+                    indicator.classList.remove('bg-gray-600');
+                    indicator.classList.add('processing-indicator');
+                } else {
+                    indicator.classList.add('bg-gray-600');
+                    indicator.classList.remove('processing-indicator');
+                }
+            });
+        }
+
+        async function searchDatabase(query) {
+            const queryLower = query.toLowerCase();
+            const allRecords = Object.values(gptDatabase.categories).flat();
+            const matches = [];
+
+            allRecords.forEach(record => {
+                let score = 0;
+                
+                // Check exact question match
+                if (record.question.toLowerCase().includes(queryLower)) {
+                    score += 10;
+                }
+
+                // Check keyword matches
+                record.keywords.forEach(keyword => {
+                    if (queryLower.includes(keyword)) {
+                        score += 2;
+                    }
+                });
+
+                // Check partial matches
+                const queryWords = queryLower.split(' ');
+                queryWords.forEach(word => {
+                    if (word.length > 2 && record.answer.toLowerCase().includes(word)) {
+                        score += 1;
+                    }
+                });
+
+                if (score > 0) {
+                    matches.push({ ...record, score });
+                }
+            });
+
+            return matches.sort((a, b) => b.score - a.score).slice(0, 10);
+        }
+
+        async function processMarkovChain(matches, userQuery) {
+            if (matches.length === 0) {
+                return {
+                    text: "I don't have specific information about that in my knowledge base.",
+                    confidence: 0.1
+                };
+            }
+
+            // Get top matches for Markov processing
+            const topMatches = matches.filter(match => match.score >= 8);
+            
+            if (topMatches.length > 0) {
+                // Use highest scoring match for 10/10 matches
+                const bestMatch = topMatches[0];
+                return {
+                    text: bestMatch.answer,
+                    confidence: bestMatch.confidence,
+                    matchType: "exact",
+                    relatedTopics: bestMatch.related_topics
+                };
+            }
+
+            // Use Markov chain for 8/10 matches
+            const goodMatches = matches.filter(match => match.score >= 6);
+            if (goodMatches.length > 0) {
+                const combinedText = goodMatches.map(match => match.answer).join(' ');
+                const markovResponse = generateMarkovResponse(combinedText, userQuery);
+                
+                return {
+                    text: markovResponse,
+                    confidence: 0.75,
+                    matchType: "markov",
+                    sourceCount: goodMatches.length
+                };
+            }
+
+            // Fallback for lower matches
+            return {
+                text: "I found some related information, but I'd need more context to provide a comprehensive answer.",
+                confidence: 0.4,
+                matchType: "fallback"
+            };
+        }
+
+        function generateMarkovResponse(text, query) {
+            // Simple Markov chain implementation
+            const words = text.toLowerCase().split(/\s+/);
+            const wordMap = {};
+            
+            // Build word transitions
+            for (let i = 0; i < words.length - 1; i++) {
+                const currentWord = words[i];
+                const nextWord = words[i + 1];
+                
+                if (!wordMap[currentWord]) {
+                    wordMap[currentWord] = [];
+                }
+                wordMap[currentWord].push(nextWord);
+            }
+
+            // Generate response starting with query-related word
+            const queryWords = query.toLowerCase().split(/\s+/);
+            let startWord = null;
+            
+            for (const word of queryWords) {
+                if (wordMap[word]) {
+                    startWord = word;
+                    break;
+                }
+            }
+
+            if (!startWord) {
+                startWord = Object.keys(wordMap)[Math.floor(Math.random() * Object.keys(wordMap).length)];
+            }
+
+            // Generate sentence
+            const response = [];
+            let currentWord = startWord;
+            const maxWords = 50;
+
+            for (let i = 0; i < maxWords && currentWord; i++) {
+                response.push(currentWord);
+                
+                if (wordMap[currentWord] && wordMap[currentWord].length > 0) {
+                    const nextOptions = wordMap[currentWord];
+                    currentWord = nextOptions[Math.floor(Math.random() * nextOptions.length)];
+                } else {
+                    break;
+                }
+
+                // Stop at sentence endings
+                if (currentWord && (currentWord.endsWith('.') || currentWord.endsWith('!') || currentWord.endsWith('?'))) {
+                    response.push(currentWord);
+                    break;
+                }
+            }
+
+            return response.join(' ').replace(/^\w/, c => c.toUpperCase());
+        }
+
+        async function generateResponse(markovResult, userQuery) {
+            let response = markovResult.text;
+
+            // Add context based on match type
+            if (markovResult.matchType === "exact") {
+                response = `${response}`;
+                if (markovResult.relatedTopics && markovResult.relatedTopics.length > 0) {
+                    response += `\n\nRelated topics you might be interested in: ${markovResult.relatedTopics.join(', ')}.`;
+                }
+            } else if (markovResult.matchType === "markov") {
+                response = `Based on my knowledge base analysis: ${response}`;
+                response += `\n\n*This response was generated using Markov chain processing from ${markovResult.sourceCount} related sources.*`;
+            }
+
+            return response;
+        }
+
+        async function refineResponse(response) {
+            // Add final touches and formatting
+            return response.trim();
+        }
+
+        async function addBotMessageWithTyping(message) {
             const messageDiv = document.createElement('div');
-            messageDiv.classList.add('flex', 'justify-start', 'message-bubble');
+            messageDiv.classList.add('flex', 'justify-start', 'message-bubble', 'chat-message', 'mr-auto');
             messageDiv.innerHTML = `
-                <div class="flex items-end space-x-2 max-w-xs lg:max-w-md">
-                    <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-8 h-8 rounded-full">
-                    <div class="bg-gray-700 text-white p-3 rounded-lg rounded-bl-none">
+                <div class="flex items-end space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-xs"></i>
+                    </div>
+                    <div class="bg-gray-700 text-white p-3 rounded-lg rounded-bl-none max-w-full break-words">
                         <div class="typing-text"></div>
                     </div>
                 </div>
             `;
 
-            // Remove welcome message if it exists
-            const welcomeMessage = document.getElementById('welcomeMessage');
-            if (welcomeMessage) {
-                welcomeMessage.remove();
-            }
-
             chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-
-            // Type message word by word
+            
+            // Type message
             const typingElement = messageDiv.querySelector('.typing-text');
+            await typeMessage(typingElement, message);
+
+            // Save to history
+            chatHistory.push({ message, sender: 'bot', timestamp: Date.now() });
+            
+            // Scroll to bottom on mobile
+            if (window.innerWidth < 768) {
+                setTimeout(() => {
+                    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }, 100);
+            }
+        }
+
+        async function typeMessage(element, message) {
             const words = message.split(' ');
-            let currentWordIndex = 0;
-
-            const typeNextWords = () => {
-                if (currentWordIndex >= words.length) {
-                    isTyping = false;
-                    // Save to history
-                    chatHistory.push({ message, sender: 'bot', timestamp: Date.now() });
-                    saveChatHistory();
-                    return;
-                }
-
-                // Add 2-4 words at a time
-                const wordsToAdd = Math.min(Math.floor(Math.random() * 3) + 2, words.length - currentWordIndex);
-                const wordsSlice = words.slice(currentWordIndex, currentWordIndex + wordsToAdd);
+            let currentText = '';
+            
+            for (let i = 0; i < words.length; i++) {
+                currentText += (i > 0 ? ' ' : '') + words[i];
+                element.textContent = currentText;
                 
-                if (currentWordIndex === 0) {
-                    typingElement.textContent = wordsSlice.join(' ');
-                } else {
-                    typingElement.textContent += ' ' + wordsSlice.join(' ');
-                }
-
-                currentWordIndex += wordsToAdd;
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-
-                // Continue typing (2-4 words per second = 250-500ms delay)
-                setTimeout(typeNextWords, Math.random() * 250 + 250);
-            };
-
-            typeNextWords();
-        }
-
-        function generateResponse(message) {
-            const lowerMessage = message.toLowerCase();
-            
-            // Check for exact matches first
-            for (const [key, response] of Object.entries(qaData)) {
-                if (lowerMessage.includes(key)) {
-                    return response;
-                }
+                // Add slight delay between words
+                await sleep(50 + Math.random() * 100);
             }
-
-            // Provide contextual responses based on current model
-            const currentModel = document.getElementById('modelSelect').value;
-            if (currentModel === 'gpt-5o') {
-                return "As GPT-5o, I can provide you with detailed and comprehensive assistance on this topic. " + qaData.default;
-            } else {
-                return "I'm running on GPT-5o Mini. " + qaData.default;
-            }
-        }
-
-        function incrementMessageCount() {
-            currentUser.messageCount++;
-            
-            // Update in storage
-            const data = JSON.parse(localStorage.getItem('chatAppData'));
-            const userIndex = data.users.findIndex(u => u.email === currentUser.email);
-            if (userIndex !== -1) {
-                data.users[userIndex].messageCount = currentUser.messageCount;
-                localStorage.setItem('chatAppData', JSON.stringify(data));
-            }
-            
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            updatePlanUI();
-            updateUsageStats();
-        }
-
-        function resetMessageCountsIfNeeded() {
-            const data = JSON.parse(localStorage.getItem('chatAppData'));
-            const now = Date.now();
-            const oneHour = 60 * 60 * 1000;
-            
-            let updated = false;
-            data.users.forEach(user => {
-                if (user.plan === 'free' && (now - user.lastReset) > oneHour) {
-                    user.messageCount = 0;
-                    user.lastReset = now;
-                    updated = true;
-                }
-            });
-            
-            if (updated) {
-                localStorage.setItem('chatAppData', JSON.stringify(data));
-                if (currentUser && currentUser.plan === 'free') {
-                    currentUser.messageCount = 0;
-                    currentUser.lastReset = now;
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    updatePlanUI();
-                    updateUsageStats();
-                }
-            }
-        }
-
-        function handlePayment(e) {
-            e.preventDefault();
-            
-            // Simulate payment processing
-            const cardNumber = document.getElementById('cardNumber').value;
-            const expiryDate = document.getElementById('expiryDate').value;
-            const cvc = document.getElementById('cvc').value;
-            const cardName = document.getElementById('cardName').value;
-
-            if (!cardNumber || !expiryDate || !cvc || !cardName) {
-                alert('Please fill in all payment fields');
-                return;
-            }
-
-            // Simulate successful payment
-            setTimeout(() => {
-                // Update user to paid
-                currentUser.plan = 'paid';
-                
-                const data = JSON.parse(localStorage.getItem('chatAppData'));
-                const userIndex = data.users.findIndex(u => u.email === currentUser.email);
-                if (userIndex !== -1) {
-                    data.users[userIndex].plan = 'paid';
-                    localStorage.setItem('chatAppData', JSON.stringify(data));
-                }
-                
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                
-                paymentModal.classList.add('hidden');
-                updatePlanUI();
-                alert('Payment successful! You now have premium access.');
-            }, 1000);
-        }
-
-        function handleMakeUserPaid() {
-            const email = document.getElementById('adminUserEmail').value;
-            if (!email) {
-                alert('Please enter a user email');
-                return;
-            }
-
-            const data = JSON.parse(localStorage.getItem('chatAppData'));
-            const userIndex = data.users.findIndex(u => u.email === email);
-            
-            if (userIndex === -1) {
-                alert('User not found');
-                return;
-            }
-
-            data.users[userIndex].plan = 'paid';
-            localStorage.setItem('chatAppData', JSON.stringify(data));
-            
-            // Update current user if it's the same user
-            if (currentUser && currentUser.email === email) {
-                currentUser.plan = 'paid';
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                updatePlanUI();
-            }
-
-            alert(`User ${email} has been upgraded to paid plan`);
-            document.getElementById('adminUserEmail').value = '';
-        }
-
-        function handleModelChange() {
-            updateUsageStats();
         }
 
         function clearChat() {
             chatHistory = [];
-            saveChatHistory();
+            messageCounter = 0;
             chatContainer.innerHTML = `
-                <div id="welcomeMessage" class="text-center py-12">
-                    <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-16 h-16 rounded-full mx-auto mb-4">
-                    <h2 class="text-2xl font-bold mb-2">Welcome to GPT-5o</h2>
-                    <p class="text-gray-400">Start a conversation with our AI assistant</p>
+                <div id="welcomeMessage" class="text-center py-8 md:py-12">
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-lg md:text-2xl"></i>
+                    </div>
+                    <h2 class="text-xl md:text-2xl font-bold mb-2">Welcome to GPT-5o Advanced</h2>
+                    <p class="text-gray-400 text-sm md:text-base mb-4">AI-powered assistant with 5-stage Markov chain processing</p>
+                    <div class="flex flex-wrap justify-center gap-2 text-xs">
+                        <span class="bg-green-600 px-2 py-1 rounded">JSON Database</span>
+                        <span class="bg-blue-600 px-2 py-1 rounded">Markov Chain</span>
+                        <span class="bg-purple-600 px-2 py-1 rounded">Smart Matching</span>
+                    </div>
                 </div>
             `;
+            updateStats();
         }
 
-        function exportChat() {
-            if (chatHistory.length === 0) {
-                alert('No chat history to export');
-                return;
-            }
-
-            const chatData = {
-                user: currentUser.username,
-                exported: new Date().toISOString(),
-                messages: chatHistory
-            };
-
-            const blob = new Blob([JSON.stringify(chatData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `chat-history-${Date.now()}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        function saveChatHistory() {
-            if (currentUser) {
-                localStorage.setItem(`chatHistory_${currentUser.email}`, JSON.stringify(chatHistory));
-            }
-        }
-
-        function loadChatHistory() {
-            if (currentUser) {
-                const saved = localStorage.getItem(`chatHistory_${currentUser.email}`);
-                if (saved) {
-                    chatHistory = JSON.parse(saved);
-                    reconstructChatUI();
-                }
-            }
-        }
-
-        function reconstructChatUI() {
-            chatContainer.innerHTML = '';
+        function updateStats() {
+            document.getElementById('messageCount').textContent = messageCounter;
             
-            if (chatHistory.length === 0) {
-                chatContainer.innerHTML = `
-                    <div id="welcomeMessage" class="text-center py-12">
-                        <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-16 h-16 rounded-full mx-auto mb-4">
-                        <h2 class="text-2xl font-bold mb-2">Welcome to GPT-5o</h2>
-                        <p class="text-gray-400">Start a conversation with our AI assistant</p>
-                    </div>
-                `;
-                return;
+            // Update response time
+            if (processingStartTime > 0) {
+                const responseTime = ((Date.now() - processingStartTime) / 1000).toFixed(1);
+                document.getElementById('avgResponse').textContent = `${responseTime}s`;
             }
+        }
 
-            chatHistory.forEach(chat => {
-                const messageDiv = document.createElement('div');
-                messageDiv.classList.add('flex', 'message-bubble');
-                
-                if (chat.sender === 'user') {
-                    messageDiv.classList.add('justify-end');
-                    messageDiv.innerHTML = `
-                        <div class="flex items-end space-x-2 max-w-xs lg:max-w-md">
-                            <div class="bg-blue-600 text-white p-3 rounded-lg rounded-br-none">
-                                ${chat.message}
-                            </div>
-                            <img src="profile/user.jpg" alt="User" class="w-8 h-8 rounded-full">
-                        </div>
-                    `;
-                } else {
-                    messageDiv.classList.add('justify-start');
-                    messageDiv.innerHTML = `
-                        <div class="flex items-end space-x-2 max-w-xs lg:max-w-md">
-                            <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-8 h-8 rounded-full">
-                            <div class="bg-gray-700 text-white p-3 rounded-lg rounded-bl-none">
-                                ${chat.message}
-                            </div>
-                        </div>
-                    `;
-                }
-
-                chatContainer.appendChild(messageDiv);
-            });
-
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
         }
 
         // Initialize the application when DOM is loaded
         document.addEventListener('DOMContentLoaded', init);
 
-        // Reset message counts every hour
-        setInterval(resetMessageCountsIfNeeded, 60 * 60 * 1000);
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                closeMobileMenu_();
+            }
+        });
     </script>
 </body>
 </html>
