@@ -1,1172 +1,977 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Enhanced GPT-5o ChatBot - Modern UI</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  
-  <!-- External Libraries -->
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <style>
-    :root {
-      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      --dark-bg: #0f0f23;
-      --dark-surface: #1a1a2e;
-      --dark-surface-light: #16213e;
-      --accent-blue: #4f46e5;
-      --accent-purple: #7c3aed;
-      --text-light: #e2e8f0;
-      --text-muted: #94a3b8;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--dark-bg);
-      color: var(--text-light);
-      overflow-x: hidden;
-      min-height: 100vh;
-    }
-
-    .glass-effect {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .gradient-text {
-      background: var(--primary-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .chat-bubble-user {
-      background: var(--primary-gradient);
-      color: white;
-      border-radius: 18px 18px 4px 18px;
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-    }
-
-    .chat-bubble-bot {
-      background: var(--dark-surface-light);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 18px 18px 18px 4px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .typing-animation {
-      display: flex;
-      gap: 4px;
-      padding: 12px 16px;
-    }
-
-    .typing-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent-blue);
-      animation: typing 1.4s infinite ease-in-out;
-    }
-
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes typing {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
-      30% { transform: translateY(-10px); opacity: 1; }
-    }
-
-    .message-fade-in {
-      animation: fadeInUp 0.5s ease forwards;
-      opacity: 0;
-      transform: translateY(20px);
-    }
-
-    @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .sidebar-transition {
-      transition: transform 0.3s ease-in-out;
-    }
-
-    .search-highlight {
-      background: rgba(255, 255, 0, 0.3);
-      padding: 2px 4px;
-      border-radius: 4px;
-    }
-
-    .conversation-item:hover {
-      background: rgba(255, 255, 255, 0.05);
-      transform: translateX(4px);
-    }
-
-    .model-badge {
-      background: var(--secondary-gradient);
-      color: white;
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .status-indicator {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #10b981;
-      box-shadow: 0 0 8px #10b981;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    .input-glow:focus {
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1), 0 0 20px rgba(79, 70, 229, 0.2);
-    }
-
-    .btn-primary {
-      background: var(--primary-gradient);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: var(--text-light);
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .scrollbar-thin::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .scrollbar-thin::-webkit-scrollbar-track {
-      background: var(--dark-surface);
-    }
-
-    .scrollbar-thin::-webkit-scrollbar-thumb {
-      background: var(--accent-blue);
-      border-radius: 3px;
-    }
-
-    .code-block {
-      background: var(--dark-surface);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      padding: 12px;
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 0.875rem;
-      margin: 8px 0;
-      overflow-x: auto;
-    }
-
-    .message-actions {
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .message:hover .message-actions {
-      opacity: 1;
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-      
-      .sidebar.open {
-        transform: translateX(0);
-      }
-    }
-
-    .export-modal {
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(8px);
-    }
-
-    .modal-content {
-      background: var(--dark-surface);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-    }
-
-    /* PDF Export Optimizations */
-    @media print {
-      body {
-        background: white !important;
-        color: black !important;
-        overflow: visible !important;
-      }
-      
-      .sidebar {
-        display: none !important;
-      }
-      
-      .main-content {
-        margin-left: 0 !important;
-        width: 100% !important;
-      }
-      
-      .chat-container {
-        overflow: visible !important;
-        height: auto !important;
-        max-height: none !important;
-      }
-      
-      .message {
-        break-inside: avoid;
-        margin-bottom: 16px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-5o ChatBot - Complete System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        * {
+            scroll-behavior: smooth;
+        }
+        
+        .chat-container {
+            height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+        
+        .sidebar {
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .typing-animation {
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        
+        .message-bubble {
+            animation: slideUp 0.3s ease forwards;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .payment-modal {
+            backdrop-filter: blur(10px);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .scrollbar-thin {
+            scrollbar-width: thin;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+        }
+        
+        @media print {
+            .sidebar { display: none !important; }
+            .chat-container { height: auto !important; overflow: visible !important; }
+            .no-print { display: none !important; }
+        }
+    </style>
 </head>
-<body>
-  <div id="app" class="flex h-screen">
-    <!-- Sidebar -->
-    <div id="sidebar" class="sidebar sidebar-transition fixed lg:relative z-50 w-80 h-full glass-effect border-r border-gray-700 flex flex-col">
-      <!-- Header -->
-      <div class="p-6 border-b border-gray-700">
-        <div class="flex items-center justify-between mb-4">
-          <h1 class="text-2xl font-bold gradient-text">GPT-5o Chat</h1>
-          <button id="sidebar-close" class="lg:hidden text-gray-400 hover:text-white">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="status-indicator"></div>
-          <span class="text-sm text-gray-400">Online</span>
-          <div class="model-badge ml-auto" id="current-model-badge">GPT-5o</div>
-        </div>
-      </div>
-
-      <!-- Search -->
-      <div class="p-4 border-b border-gray-700">
-        <div class="relative">
-          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-          <input id="search-input" type="text" placeholder="Search conversations..." 
-                 class="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-        </div>
-      </div>
-
-      <!-- Auth Section -->
-      <div id="auth-section" class="p-4">
-        <div id="login-form" class="space-y-4">
-          <h3 class="text-lg font-semibold mb-4">Sign In</h3>
-          <input id="login-email" type="email" placeholder="Email" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 input-glow">
-          <input id="login-password" type="password" placeholder="Password" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 input-glow">
-          <button id="login-btn" class="btn-primary w-full">Sign In</button>
-          <p class="text-sm text-gray-400 text-center">
-            Don't have an account? <button id="show-signup" class="text-blue-400 hover:underline">Sign up</button>
-          </p>
-        </div>
-
-        <div id="signup-form" class="space-y-4 hidden">
-          <h3 class="text-lg font-semibold mb-4">Create Account</h3>
-          <input id="signup-name" type="text" placeholder="Full Name" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 input-glow">
-          <input id="signup-email" type="email" placeholder="Email" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 input-glow">
-          <input id="signup-password" type="password" placeholder="Password" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 input-glow">
-          <button id="signup-btn" class="btn-primary w-full">Create Account</button>
-          <p class="text-sm text-gray-400 text-center">
-            Already have an account? <button id="show-login" class="text-blue-400 hover:underline">Sign in</button>
-          </p>
-        </div>
-      </div>
-
-      <!-- User Profile (hidden initially) -->
-      <div id="user-profile" class="p-4 border-b border-gray-700 hidden">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-            <i class="fas fa-user text-white"></i>
-          </div>
-          <div>
-            <div id="user-name" class="font-semibold">User</div>
-            <div id="user-email" class="text-sm text-gray-400"></div>
-          </div>
-        </div>
-        
-        <div class="space-y-2 mb-4">
-          <div class="flex justify-between text-sm">
-            <span class="text-gray-400">Messages today:</span>
-            <span id="message-count">0</span>
-          </div>
-          <div class="w-full bg-gray-700 rounded-full h-2">
-            <div id="message-progress" class="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full" style="width: 0%"></div>
-          </div>
-        </div>
-
-        <div class="space-y-2">
-          <select id="model-select" class="w-full p-2 bg-gray-800 border border-gray-600 rounded-lg text-white">
-            <option value="GPT-5o">GPT-5o (Premium)</option>
-            <option value="GPT-5o-mini">GPT-5o-mini (Fast)</option>
-          </select>
-          <button id="logout-btn" class="btn-secondary w-full">
-            <i class="fas fa-sign-out-alt mr-2"></i>Logout
-          </button>
-        </div>
-      </div>
-
-      <!-- Conversation History -->
-      <div class="flex-1 overflow-y-auto scrollbar-thin">
-        <div class="p-4">
-          <div class="flex items-center justify-between mb-4">
-            <h4 class="font-semibold text-gray-300">Conversations</h4>
-            <button id="new-chat-btn" class="text-gray-400 hover:text-white">
-              <i class="fas fa-plus"></i>
-            </button>
-          </div>
-          <div id="conversation-list" class="space-y-2">
-            <!-- Conversations will be populated here -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Export Options -->
-      <div class="p-4 border-t border-gray-700">
-        <button id="export-btn" class="btn-secondary w-full">
-          <i class="fas fa-download mr-2"></i>Export Chat
-        </button>
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content flex-1 flex flex-col lg:ml-0">
-      <!-- Header -->
-      <div class="flex items-center justify-between p-4 border-b border-gray-700 glass-effect">
-        <div class="flex items-center gap-4">
-          <button id="sidebar-toggle" class="lg:hidden text-gray-400 hover:text-white">
-            <i class="fas fa-bars"></i>
-          </button>
-          <h2 class="text-xl font-semibold">New Conversation</h2>
-        </div>
-        <div class="flex items-center gap-3">
-          <button id="theme-toggle" class="btn-secondary">
-            <i class="fas fa-moon"></i>
-          </button>
-          <button id="clear-chat" class="btn-secondary">
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Chat Container -->
-      <div id="chat-container" class="flex-1 overflow-y-auto p-6 scrollbar-thin">
-        <div class="max-w-4xl mx-auto">
-          <div id="welcome-message" class="text-center py-12">
-            <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <i class="fas fa-robot text-2xl text-white"></i>
+<body class="bg-gray-900 text-white">
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="fixed inset-0 z-50 hidden payment-modal bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-gray-800 p-8 rounded-xl max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Upgrade to Premium</h2>
+                <button id="closePayment" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <h2 class="text-2xl font-bold mb-4 gradient-text">Welcome to GPT-5o</h2>
-            <p class="text-gray-400 max-w-md mx-auto">Start a conversation by typing a message below. I'm here to help with any questions or tasks you have.</p>
-          </div>
-          
-          <div id="messages-container">
-            <!-- Messages will be populated here -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Input Area -->
-      <div class="p-4 border-t border-gray-700 glass-effect">
-        <div class="max-w-4xl mx-auto">
-          <div class="flex items-end gap-4">
-            <div class="flex-1 relative">
-              <textarea id="message-input" 
-                        placeholder="Type your message here..." 
-                        class="w-full p-4 bg-gray-800 border border-gray-600 rounded-2xl text-white placeholder-gray-400 resize-none input-glow pr-12"
-                        rows="1"
-                        style="min-height: 56px; max-height: 200px;"></textarea>
-              <button id="send-btn" class="absolute right-3 bottom-3 w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white hover:scale-105 transition-transform">
-                <i class="fas fa-paper-plane"></i>
-              </button>
+            
+            <div class="mb-6">
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-lg mb-4">
+                    <h3 class="font-bold text-lg">Premium Plan - $19.99/month</h3>
+                    <ul class="text-sm mt-2 space-y-1">
+                        <li>✓ Unlimited messages</li>
+                        <li>✓ Access to GPT-5o premium model</li>
+                        <li>✓ Priority response times</li>
+                        <li>✓ Export conversations</li>
+                    </ul>
+                </div>
             </div>
-          </div>
-          <div class="text-xs text-gray-500 mt-2 text-center">
-            Press Shift+Enter for new line, Enter to send
-          </div>
+            
+            <form id="paymentForm">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Card Number</label>
+                        <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" 
+                               class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                               maxlength="19" required>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Expiry Date</label>
+                            <input type="text" id="expiryDate" placeholder="MM/YY" 
+                                   class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                                   maxlength="5" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">CVC</label>
+                            <input type="text" id="cvc" placeholder="123" 
+                                   class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                                   maxlength="4" required>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Cardholder Name</label>
+                        <input type="text" id="cardName" placeholder="John Doe" 
+                               class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                               required>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 p-3 rounded-lg font-semibold transition-all">
+                        Subscribe for $19.99/month
+                    </button>
+                </div>
+            </form>
         </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Export Modal -->
-  <div id="export-modal" class="export-modal fixed inset-0 z-50 flex items-center justify-center hidden">
-    <div class="modal-content p-6 max-w-md w-full mx-4">
-      <h3 class="text-xl font-semibold mb-4">Export Conversation</h3>
-      <div class="space-y-4">
-        <button id="export-txt" class="btn-secondary w-full text-left">
-          <i class="fas fa-file-alt mr-3"></i>Export as Text
-        </button>
-        <button id="export-json" class="btn-secondary w-full text-left">
-          <i class="fas fa-file-code mr-3"></i>Export as JSON
-        </button>
-        <button id="export-html" class="btn-secondary w-full text-left">
-          <i class="fas fa-file-code mr-3"></i>Export as HTML
-        </button>
-      </div>
-      <button id="export-cancel" class="btn-secondary w-full mt-4">Cancel</button>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-80 bg-gray-800 border-r border-gray-700 sidebar no-print">
+            <!-- Logo -->
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-robot text-white"></i>
+                    </div>
+                    <h1 class="text-xl font-bold">GPT-5o</h1>
+                </div>
+            </div>
+
+            <!-- Auth Section -->
+            <div id="authSection" class="p-6">
+                <!-- Login Form -->
+                <div id="loginForm" class="space-y-4">
+                    <h2 class="text-lg font-semibold mb-4">Sign In</h2>
+                    <input type="email" id="loginEmail" placeholder="Email" 
+                           class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
+                    <input type="password" id="loginPassword" placeholder="Password" 
+                           class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
+                    <button id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg font-semibold transition-colors">
+                        Sign In
+                    </button>
+                    <p class="text-sm text-gray-400 text-center">
+                        Don't have an account? <button id="showSignup" class="text-blue-400 hover:underline">Sign up</button>
+                    </p>
+                </div>
+
+                <!-- Signup Form -->
+                <div id="signupForm" class="space-y-4 hidden">
+                    <h2 class="text-lg font-semibold mb-4">Create Account</h2>
+                    <input type="text" id="signupUsername" placeholder="Username" 
+                           class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
+                    <input type="email" id="signupEmail" placeholder="Email" 
+                           class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
+                    <input type="password" id="signupPassword" placeholder="Password" 
+                           class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
+                    <button id="signupBtn" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-lg font-semibold transition-colors">
+                        Create Account
+                    </button>
+                    <p class="text-sm text-gray-400 text-center">
+                        Already have an account? <button id="showLogin" class="text-blue-400 hover:underline">Sign in</button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- User Profile -->
+            <div id="userProfile" class="p-6 border-b border-gray-700 hidden">
+                <div class="flex items-center space-x-3 mb-4">
+                    <img id="userAvatar" src="profile/user.jpg" alt="User" class="w-10 h-10 rounded-full">
+                    <div>
+                        <div id="userName" class="font-semibold"></div>
+                        <div id="userEmail" class="text-sm text-gray-400"></div>
+                    </div>
+                </div>
+                
+                <!-- Plan Info -->
+                <div id="planInfo" class="mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-400">Plan:</span>
+                        <span id="currentPlan" class="text-sm font-semibold">Free</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-400">Messages:</span>
+                        <span id="messageCount" class="text-sm">0/20</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2 mb-3">
+                        <div id="messageProgress" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Model Selection -->
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-400 mb-2">Model:</label>
+                    <select id="modelSelect" class="w-full p-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
+                        <option value="gpt-5o-mini">GPT-5o Mini (Free)</option>
+                        <option value="gpt-5o" disabled>GPT-5o Premium (Paid)</option>
+                    </select>
+                </div>
+
+                <!-- Upgrade Button -->
+                <button id="upgradeBtn" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 p-3 rounded-lg font-semibold transition-all mb-4">
+                    <i class="fas fa-crown mr-2"></i>Upgrade to Premium
+                </button>
+
+                <button id="logoutBtn" class="w-full bg-gray-600 hover:bg-gray-700 p-2 rounded-lg text-sm transition-colors">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </button>
+            </div>
+
+            <!-- Admin Panel -->
+            <div id="adminPanel" class="p-6 border-b border-gray-700 hidden">
+                <h3 class="text-lg font-semibold mb-4">Admin Panel</h3>
+                <div class="space-y-3">
+                    <input type="email" id="adminUserEmail" placeholder="User email" 
+                           class="w-full p-2 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none text-sm">
+                    <button id="makePaidBtn" class="w-full bg-green-600 hover:bg-green-700 p-2 rounded-lg text-sm font-semibold transition-colors">
+                        Make User Paid
+                    </button>
+                    <div class="text-xs text-gray-400">
+                        Seed admin: admin@gmail.com / Admin123
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usage Stats -->
+            <div id="usageStats" class="p-6 hidden">
+                <h3 class="text-sm font-semibold mb-3 text-gray-400">Usage Statistics</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span>Today:</span>
+                        <span id="todayMessages">0 messages</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>This Hour:</span>
+                        <span id="hourMessages">0 messages</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Current Model:</span>
+                        <span id="currentModel">GPT-5o Mini</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Chat Header -->
+            <div class="bg-gray-800 border-b border-gray-700 p-4 no-print">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-8 h-8 rounded-full">
+                        <div>
+                            <div class="font-semibold">GPT-5o Assistant</div>
+                            <div class="text-xs text-gray-400">AI-powered chat assistant</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button id="exportBtn" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg text-sm transition-colors">
+                            <i class="fas fa-download mr-2"></i>Export
+                        </button>
+                        <button id="clearChatBtn" class="bg-red-600 hover:bg-red-700 px-3 py-2 rounded-lg text-sm transition-colors">
+                            <i class="fas fa-trash mr-2"></i>Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="chatContainer" class="flex-1 overflow-y-auto p-6 space-y-4 chat-container scrollbar-thin">
+                <div id="welcomeMessage" class="text-center py-12">
+                    <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-16 h-16 rounded-full mx-auto mb-4">
+                    <h2 class="text-2xl font-bold mb-2">Welcome to GPT-5o</h2>
+                    <p class="text-gray-400">Start a conversation with our AI assistant</p>
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="bg-gray-800 border-t border-gray-700 p-4 no-print">
+                <div class="flex items-center space-x-3">
+                    <div class="flex-1 relative">
+                        <textarea id="chatInput" 
+                                placeholder="Type your message here..." 
+                                class="w-full p-3 pr-12 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none resize-none"
+                                rows="1"></textarea>
+                        <button id="sendBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                            <i class="fas fa-paper-plane text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-400 mt-2">
+                    <span>Press Enter to send, Shift+Enter for new line</span>
+                    <span id="inputCounter">0/1000</span>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    // Application State
-    let currentUser = null;
-    let conversations = [];
-    let currentConversation = null;
-    let isTyping = false;
-    let messageCount = 0;
-    const MAX_FREE_MESSAGES = 20;
+    <script>
+        // Initialize data structure
+        const defaultData = {
+            users: [
+                {
+                    username: "admin",
+                    email: "admin@gmail.com",
+                    password: "Admin123",
+                    role: "admin",
+                    plan: "paid",
+                    messageCount: 0,
+                    lastReset: Date.now(),
+                    createdAt: Date.now()
+                },
+                {
+                    username: "testuser",
+                    email: "testuser@example.com",
+                    password: "Test123",
+                    role: "user",
+                    plan: "free",
+                    messageCount: 0,
+                    lastReset: Date.now(),
+                    createdAt: Date.now()
+                }
+            ]
+        };
 
-    // DOM Elements
-    const elements = {
-      sidebar: document.getElementById('sidebar'),
-      sidebarToggle: document.getElementById('sidebar-toggle'),
-      sidebarClose: document.getElementById('sidebar-close'),
-      loginForm: document.getElementById('login-form'),
-      signupForm: document.getElementById('signup-form'),
-      userProfile: document.getElementById('user-profile'),
-      authSection: document.getElementById('auth-section'),
-      messagesContainer: document.getElementById('messages-container'),
-      messageInput: document.getElementById('message-input'),
-      sendBtn: document.getElementById('send-btn'),
-      welcomeMessage: document.getElementById('welcome-message'),
-      searchInput: document.getElementById('search-input'),
-      conversationList: document.getElementById('conversation-list'),
-      exportModal: document.getElementById('export-modal'),
-      currentModelBadge: document.getElementById('current-model-badge'),
-      messageCount: document.getElementById('message-count'),
-      messageProgress: document.getElementById('message-progress')
-    };
+        // Sample QA data for the chatbot
+        const qaData = {
+            "hello": "Hello! I'm GPT-5o, your AI assistant. How can I help you today?",
+            "hi": "Hi there! What would you like to chat about?",
+            "how are you": "I'm doing great, thank you for asking! I'm here and ready to help you with any questions or tasks you might have.",
+            "what can you do": "I can help you with a wide variety of tasks including answering questions, writing, analysis, coding, creative projects, and much more. What would you like assistance with?",
+            "weather": "I don't have access to real-time weather data, but I'd be happy to help you find weather information or discuss weather-related topics!",
+            "default": "That's an interesting question! I'd be happy to help you explore that topic further. Could you provide more details about what you're looking for?"
+        };
 
-    // Sample QA Data
-    const qaData = {
-      "hello": "Hello! How can I help you today?",
-      "how are you": "I'm doing great, thank you for asking! How are you?",
-      "what is ai": "AI (Artificial Intelligence) refers to the simulation of human intelligence in machines that are programmed to think and learn like humans.",
-      "tell me a joke": "Why don't scientists trust atoms? Because they make up everything!",
-      "default": "I'm here to help you with any questions you might have. Feel free to ask me anything!"
-    };
+        // Application state
+        let currentUser = null;
+        let chatHistory = [];
+        let isTyping = false;
 
-    // Utility Functions
-    function generateId() {
-      return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
+        // DOM elements
+        const authSection = document.getElementById('authSection');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const userProfile = document.getElementById('userProfile');
+        const adminPanel = document.getElementById('adminPanel');
+        const usageStats = document.getElementById('usageStats');
+        const paymentModal = document.getElementById('paymentModal');
+        const chatContainer = document.getElementById('chatContainer');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
 
-    function saveToStorage(key, data) {
-      localStorage.setItem(key, JSON.stringify(data));
-    }
+        // Initialize application
+        function init() {
+            // Load or initialize data
+            if (!localStorage.getItem('chatAppData')) {
+                localStorage.setItem('chatAppData', JSON.stringify(defaultData));
+            }
 
-    function loadFromStorage(key, defaultValue = null) {
-      try {
-        const data = localStorage.getItem(key);
-        return data ? JSON.parse(data) : defaultValue;
-      } catch (e) {
-        return defaultValue;
-      }
-    }
+            // Load current user session
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showUserInterface();
+            }
 
-    function formatTime(timestamp) {
-      return new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    }
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Setup chat input
+            setupChatInput();
 
-    // Authentication Functions
-    function showLogin() {
-      elements.loginForm.classList.remove('hidden');
-      elements.signupForm.classList.add('hidden');
-    }
-
-    function showSignup() {
-      elements.signupForm.classList.remove('hidden');
-      elements.loginForm.classList.add('hidden');
-    }
-
-    function login(email, password) {
-      const users = loadFromStorage('users', []);
-      const user = users.find(u => u.email === email && u.password === password);
-      
-      if (user) {
-        currentUser = user;
-        showUserProfile();
-        loadUserConversations();
-        saveToStorage('currentUser', currentUser);
-        return true;
-      }
-      return false;
-    }
-
-    function signup(name, email, password) {
-      const users = loadFromStorage('users', []);
-      
-      if (users.find(u => u.email === email)) {
-        return false; // User already exists
-      }
-
-      const newUser = {
-        id: generateId(),
-        name,
-        email,
-        password,
-        isPaid: false,
-        createdAt: Date.now(),
-        messageCount: 0,
-        lastReset: Date.now()
-      };
-
-      users.push(newUser);
-      saveToStorage('users', users);
-      
-      currentUser = newUser;
-      showUserProfile();
-      saveToStorage('currentUser', currentUser);
-      return true;
-    }
-
-    function logout() {
-      currentUser = null;
-      conversations = [];
-      currentConversation = null;
-      localStorage.removeItem('currentUser');
-      
-      elements.userProfile.classList.add('hidden');
-      elements.authSection.classList.remove('hidden');
-      elements.messagesContainer.innerHTML = '';
-      elements.welcomeMessage.classList.remove('hidden');
-      
-      showLogin();
-    }
-
-    function showUserProfile() {
-      elements.authSection.classList.add('hidden');
-      elements.userProfile.classList.remove('hidden');
-      
-      document.getElementById('user-name').textContent = currentUser.name;
-      document.getElementById('user-email').textContent = currentUser.email;
-      
-      updateMessageCount();
-    }
-
-    function updateMessageCount() {
-      if (!currentUser) return;
-      
-      // Reset count if it's a new day
-      const now = Date.now();
-      const oneDay = 24 * 60 * 60 * 1000;
-      
-      if (now - currentUser.lastReset > oneDay) {
-        currentUser.messageCount = 0;
-        currentUser.lastReset = now;
-        updateUser();
-      }
-      
-      elements.messageCount.textContent = currentUser.messageCount;
-      const progress = Math.min((currentUser.messageCount / MAX_FREE_MESSAGES) * 100, 100);
-      elements.messageProgress.style.width = progress + '%';
-    }
-
-    function updateUser() {
-      const users = loadFromStorage('users', []);
-      const index = users.findIndex(u => u.id === currentUser.id);
-      if (index !== -1) {
-        users[index] = currentUser;
-        saveToStorage('users', users);
-        saveToStorage('currentUser', currentUser);
-      }
-    }
-
-    // Conversation Functions
-    function createNewConversation() {
-      const conversation = {
-        id: generateId(),
-        title: 'New Conversation',
-        messages: [],
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      };
-      
-      conversations.unshift(conversation);
-      currentConversation = conversation;
-      
-      elements.messagesContainer.innerHTML = '';
-      elements.welcomeMessage.classList.remove('hidden');
-      
-      saveConversations();
-      updateConversationList();
-    }
-
-    function loadUserConversations() {
-      if (!currentUser) return;
-      
-      conversations = loadFromStorage(`conversations_${currentUser.id}`, []);
-      updateConversationList();
-      
-      if (conversations.length === 0) {
-        createNewConversation();
-      } else {
-        currentConversation = conversations[0];
-        loadConversation(currentConversation);
-      }
-    }
-
-    function saveConversations() {
-      if (!currentUser) return;
-      saveToStorage(`conversations_${currentUser.id}`, conversations);
-    }
-
-    function loadConversation(conversation) {
-      currentConversation = conversation;
-      elements.messagesContainer.innerHTML = '';
-      elements.welcomeMessage.classList.add('hidden');
-      
-      conversation.messages.forEach(message => {
-        displayMessage(message);
-      });
-      
-      scrollToBottom();
-    }
-
-    function updateConversationList() {
-      elements.conversationList.innerHTML = '';
-      
-      conversations.forEach(conv => {
-        const div = document.createElement('div');
-        div.className = 'conversation-item p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700';
-        
-        if (currentConversation && conv.id === currentConversation.id) {
-          div.classList.add('bg-gray-700');
+            // Reset message counts if needed
+            resetMessageCountsIfNeeded();
         }
-        
-        div.innerHTML = `
-          <div class="font-medium text-sm truncate">${conv.title}</div>
-          <div class="text-xs text-gray-400 mt-1">${formatTime(conv.updatedAt)}</div>
-        `;
-        
-        div.addEventListener('click', () => {
-          loadConversation(conv);
-          updateConversationList();
-          
-          // Close sidebar on mobile
-          if (window.innerWidth < 1024) {
-            elements.sidebar.classList.remove('open');
-          }
-        });
-        
-        elements.conversationList.appendChild(div);
-      });
-    }
 
-    // Message Functions
-    function addMessage(content, isUser = false) {
-      if (!currentConversation) {
-        createNewConversation();
-      }
-      
-      const message = {
-        id: generateId(),
-        content,
-        isUser,
-        timestamp: Date.now()
-      };
-      
-      currentConversation.messages.push(message);
-      currentConversation.updatedAt = Date.now();
-      
-      // Update conversation title if it's the first user message
-      if (isUser && currentConversation.messages.filter(m => m.isUser).length === 1) {
-        currentConversation.title = content.substring(0, 50) + (content.length > 50 ? '...' : '');
-      }
-      
-      displayMessage(message);
-      saveConversations();
-      updateConversationList();
-      
-      return message;
-    }
+        function setupEventListeners() {
+            // Auth form toggles
+            document.getElementById('showSignup').addEventListener('click', () => {
+                loginForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+            });
 
-    function displayMessage(message) {
-      elements.welcomeMessage.classList.add('hidden');
-      
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `message flex gap-4 mb-6 message-fade-in ${message.isUser ? 'justify-end' : 'justify-start'}`;
-      
-      const avatarDiv = document.createElement('div');
-      avatarDiv.className = `w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-        message.isUser ? 'bg-gradient-to-r from-blue-500 to-purple-600 order-2' : 'bg-gray-700'
-      }`;
-      avatarDiv.innerHTML = `<i class="fas ${message.isUser ? 'fa-user' : 'fa-robot'} text-white text-sm"></i>`;
-      
-      const contentDiv = document.createElement('div');
-      contentDiv.className = `max-w-2xl ${message.isUser ? 'order-1' : 'order-2'}`;
-      
-      const bubbleDiv = document.createElement('div');
-      bubbleDiv.className = `p-4 ${message.isUser ? 'chat-bubble-user' : 'chat-bubble-bot'}`;
-      
-      // Process content for code blocks and formatting
-      const processedContent = processMessageContent(message.content);
-      bubbleDiv.innerHTML = processedContent;
-      
-      const timeDiv = document.createElement('div');
-      timeDiv.className = `text-xs text-gray-500 mt-2 ${message.isUser ? 'text-right' : 'text-left'}`;
-      timeDiv.textContent = formatTime(message.timestamp);
-      
-      const actionsDiv = document.createElement('div');
-      actionsDiv.className = `message-actions flex gap-2 mt-2 ${message.isUser ? 'justify-end' : 'justify-start'}`;
-      
-      if (!message.isUser) {
-        actionsDiv.innerHTML = `
-          <button class="copy-btn text-gray-400 hover:text-white p-1" title="Copy message">
-            <i class="fas fa-copy"></i>
-          </button>
-          <button class="like-btn text-gray-400 hover:text-green-400 p-1" title="Like message">
-            <i class="fas fa-thumbs-up"></i>
-          </button>
-        `;
-      }
-      
-      contentDiv.appendChild(bubbleDiv);
-      contentDiv.appendChild(timeDiv);
-      contentDiv.appendChild(actionsDiv);
-      
-      messageDiv.appendChild(avatarDiv);
-      messageDiv.appendChild(contentDiv);
-      
-      elements.messagesContainer.appendChild(messageDiv);
-      
-      // Add event listeners for actions
-      const copyBtn = actionsDiv.querySelector('.copy-btn');
-      if (copyBtn) {
-        copyBtn.addEventListener('click', () => {
-          navigator.clipboard.writeText(message.content);
-          copyBtn.innerHTML = '<i class="fas fa-check"></i>';
-          setTimeout(() => {
-            copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
-          }, 2000);
-        });
-      }
-      
-      scrollToBottom();
-    }
+            document.getElementById('showLogin').addEventListener('click', () => {
+                signupForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+            });
 
-    function processMessageContent(content) {
-      // Simple processing for code blocks and formatting
-      let processed = content
-        .replace(/```([^`]+)```/g, '<div class="code-block">$1</div>')
-        .replace(/`([^`]+)`/g, '<code class="bg-gray-800 px-2 py-1 rounded text-sm">$1</code>')
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*([^*]+)\*/g, '<em>$1</em>');
-      
-      return processed;
-    }
+            // Auth buttons
+            document.getElementById('loginBtn').addEventListener('click', handleLogin);
+            document.getElementById('signupBtn').addEventListener('click', handleSignup);
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
 
-    function showTypingIndicator() {
-      const typingDiv = document.createElement('div');
-      typingDiv.id = 'typing-indicator';
-      typingDiv.className = 'message flex gap-4 mb-6 justify-start';
-      
-      typingDiv.innerHTML = `
-        <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-700">
-          <i class="fas fa-robot text-white text-sm"></i>
-        </div>
-        <div class="chat-bubble-bot">
-          <div class="typing-animation">
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-          </div>
-        </div>
-      `;
-      
-      elements.messagesContainer.appendChild(typingDiv);
-      scrollToBottom();
-    }
+            // Chat buttons
+            document.getElementById('sendBtn').addEventListener('click', handleSendMessage);
+            document.getElementById('clearChatBtn').addEventListener('click', clearChat);
+            document.getElementById('exportBtn').addEventListener('click', exportChat);
 
-    function hideTypingIndicator() {
-      const indicator = document.getElementById('typing-indicator');
-      if (indicator) {
-        indicator.remove();
-      }
-    }
+            // Payment modal
+            document.getElementById('upgradeBtn').addEventListener('click', () => {
+                paymentModal.classList.remove('hidden');
+            });
+            
+            document.getElementById('closePayment').addEventListener('click', () => {
+                paymentModal.classList.add('hidden');
+            });
 
-    function generateBotResponse(userMessage) {
-      const lowerMessage = userMessage.toLowerCase();
-      
-      // Find matching response
-      for (const [key, response] of Object.entries(qaData)) {
-        if (lowerMessage.includes(key)) {
-          return response;
+            document.getElementById('paymentForm').addEventListener('submit', handlePayment);
+
+            // Admin functions
+            document.getElementById('makePaidBtn').addEventListener('click', handleMakeUserPaid);
+
+            // Model selection
+            document.getElementById('modelSelect').addEventListener('change', handleModelChange);
+
+            // Input formatting
+            setupInputFormatting();
         }
-      }
-      
-      // Default response with some variation
-      const defaultResponses = [
-        "That's an interesting question! I'd be happy to help you explore that topic further.",
-        "I understand what you're asking. Let me think about the best way to address that.",
-        "Thank you for your question. While I don't have a specific answer for that, I can offer some general guidance.",
-        qaData.default
-      ];
-      
-      return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
-    }
 
-    async function sendMessage() {
-      const content = elements.messageInput.value.trim();
-      if (!content || isTyping) return;
-      
-      if (!currentUser) {
-        alert('Please log in to send messages.');
-        return;
-      }
-      
-      // Check message limits for free users
-      if (!currentUser.isPaid && currentUser.messageCount >= MAX_FREE_MESSAGES) {
-        alert('You have reached your daily message limit. Upgrade to continue chatting.');
-        return;
-      }
-      
-      // Add user message
-      addMessage(content, true);
-      elements.messageInput.value = '';
-      
-      // Update message count
-      currentUser.messageCount++;
-      updateUser();
-      updateMessageCount();
-      
-      // Show typing indicator
-      isTyping = true;
-      showTypingIndicator();
-      
-      // Simulate bot response delay
-      setTimeout(() => {
-        hideTypingIndicator();
-        const response = generateBotResponse(content);
-        addMessage(response, false);
-        isTyping = false;
-      }, 1500 + Math.random() * 1500);
-    }
+        function setupInputFormatting() {
+            const cardNumber = document.getElementById('cardNumber');
+            const expiryDate = document.getElementById('expiryDate');
+            const cvc = document.getElementById('cvc');
 
-    function scrollToBottom() {
-      setTimeout(() => {
-        elements.messagesContainer.scrollTop = elements.messagesContainer.scrollHeight;
-      }, 100);
-    }
+            cardNumber.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+                let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                e.target.value = formattedValue;
+            });
 
-    // Search Functions
-    function searchConversations(query) {
-      if (!query.trim()) {
-        updateConversationList();
-        return;
-      }
-      
-      const filteredConversations = conversations.filter(conv => {
-        return conv.title.toLowerCase().includes(query.toLowerCase()) ||
-               conv.messages.some(msg => msg.content.toLowerCase().includes(query.toLowerCase()));
-      });
-      
-      elements.conversationList.innerHTML = '';
-      
-      filteredConversations.forEach(conv => {
-        const div = document.createElement('div');
-        div.className = 'conversation-item p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700';
-        
-        // Highlight search terms
-        let title = conv.title;
-        const regex = new RegExp(`(${query})`, 'gi');
-        title = title.replace(regex, '<span class="search-highlight">$1</span>');
-        
-        div.innerHTML = `
-          <div class="font-medium text-sm">${title}</div>
-          <div class="text-xs text-gray-400 mt-1">${formatTime(conv.updatedAt)}</div>
-        `;
-        
-        div.addEventListener('click', () => {
-          loadConversation(conv);
-          updateConversationList();
-        });
-        
-        elements.conversationList.appendChild(div);
-      });
-    }
+            expiryDate.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+                e.target.value = value;
+            });
 
-    // Export Functions
-    function exportConversation(format) {
-      if (!currentConversation || !currentConversation.messages.length) {
-        alert('No conversation to export.');
-        return;
-      }
-      
-      const timestamp = new Date().toISOString().split('T')[0];
-      const filename = `conversation_${timestamp}`;
-      
-      let content = '';
-      let mimeType = 'text/plain';
-      
-      switch (format) {
-        case 'txt':
-          content = generateTextExport();
-          break;
-        case 'json':
-          content = JSON.stringify(currentConversation, null, 2);
-          mimeType = 'application/json';
-          break;
-        case 'html':
-          content = generateHTMLExport();
-          mimeType = 'text/html';
-          break;
-      }
-      
-      downloadFile(content, `${filename}.${format}`, mimeType);
-      elements.exportModal.classList.add('hidden');
-    }
+            cvc.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            });
+        }
 
-    function generateTextExport() {
-      let text = `Conversation Export\n`;
-      text += `Generated: ${new Date().toLocaleString()}\n`;
-      text += `Title: ${currentConversation.title}\n`;
-      text += `Messages: ${currentConversation.messages.length}\n\n`;
-      
-      currentConversation.messages.forEach(msg => {
-        const sender = msg.isUser ? 'User' : 'Assistant';
-        const time = new Date(msg.timestamp).toLocaleString();
-        text += `[${time}] ${sender}: ${msg.content}\n\n`;
-      });
-      
-      return text;
-    }
+        function setupChatInput() {
+            const input = chatInput;
+            const counter = document.getElementById('inputCounter');
+            const maxLength = 1000;
 
-    function generateHTMLExport() {
-      let html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Conversation Export</title>
-          <style>
-            body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-            .message { margin: 20px 0; padding: 15px; border-radius: 10px; }
-            .user { background: #007bff; color: white; margin-left: 20%; }
-            .assistant { background: #f8f9fa; border: 1px solid #ddd; margin-right: 20%; }
-            .timestamp { font-size: 0.8em; opacity: 0.7; margin-top: 5px; }
-            .header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #ddd; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Conversation Export</h1>
-            <p>Generated: ${new Date().toLocaleString()}</p>
-            <p>Title: ${currentConversation.title}</p>
-          </div>
-      `;
-      
-      currentConversation.messages.forEach(msg => {
-        const className = msg.isUser ? 'user' : 'assistant';
-        const sender = msg.isUser ? 'User' : 'Assistant';
-        html += `
-          <div class="message ${className}">
-            <strong>${sender}:</strong>
-            <div>${msg.content.replace(/\n/g, '<br>')}</div>
-            <div class="timestamp">${new Date(msg.timestamp).toLocaleString()}</div>
-          </div>
-        `;
-      });
-      
-      html += '</body></html>';
-      return html;
-    }
+            input.addEventListener('input', () => {
+                const length = input.value.length;
+                counter.textContent = `${length}/${maxLength}`;
+                
+                // Auto-resize textarea
+                input.style.height = 'auto';
+                input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+            });
 
-    function downloadFile(content, filename, mimeType) {
-      const blob = new Blob([content], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-      
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                }
+            });
+        }
 
-    // Event Listeners
-    document.addEventListener('DOMContentLoaded', () => {
-      // Auth events
-      document.getElementById('show-signup').addEventListener('click', showSignup);
-      document.getElementById('show-login').addEventListener('click', showLogin);
-      
-      document.getElementById('login-btn').addEventListener('click', () => {
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        
-        if (login(email, password)) {
-          document.getElementById('login-email').value = '';
-          document.getElementById('login-password').value = '';
-        } else {
-          alert('Invalid credentials. Try admin@example.com / admin123');
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                alert('Please fill in both email and password');
+                return;
+            }
+
+            const data = JSON.parse(localStorage.getItem('chatAppData'));
+            const user = data.users.find(u => u.email === email && u.password === password);
+
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                showUserInterface();
+            } else {
+                alert('Invalid email or password');
+            }
         }
-      });
-      
-      document.getElementById('signup-btn').addEventListener('click', () => {
-        const name = document.getElementById('signup-name').value;
-        const email = document.getElementById('signup-email').value;
-        const password = document.getElementById('signup-password').value;
-        
-        if (signup(name, email, password)) {
-          document.getElementById('signup-name').value = '';
-          document.getElementById('signup-email').value = '';
-          document.getElementById('signup-password').value = '';
-        } else {
-          alert('User already exists with this email.');
+
+        function handleSignup() {
+            const username = document.getElementById('signupUsername').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            if (!username || !email || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const data = JSON.parse(localStorage.getItem('chatAppData'));
+            
+            // Check if user already exists
+            if (data.users.find(u => u.email === email)) {
+                alert('User with this email already exists');
+                return;
+            }
+
+            // Create new user
+            const newUser = {
+                username,
+                email,
+                password,
+                role: 'user',
+                plan: 'free',
+                messageCount: 0,
+                lastReset: Date.now(),
+                createdAt: Date.now()
+            };
+
+            data.users.push(newUser);
+            localStorage.setItem('chatAppData', JSON.stringify(data));
+
+            currentUser = newUser;
+            localStorage.setItem('currentUser', JSON.stringify(newUser));
+            showUserInterface();
         }
-      });
-      
-      document.getElementById('logout-btn').addEventListener('click', logout);
-      
-      // Sidebar events
-      elements.sidebarToggle.addEventListener('click', () => {
-        elements.sidebar.classList.add('open');
-      });
-      
-      elements.sidebarClose.addEventListener('click', () => {
-        elements.sidebar.classList.remove('open');
-      });
-      
-      // Chat events
-      elements.sendBtn.addEventListener('click', sendMessage);
-      
-      elements.messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage();
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            chatHistory = [];
+            showAuthInterface();
+            clearChat();
         }
-      });
-      
-      // Auto-resize textarea
-      elements.messageInput.addEventListener('input', () => {
-        elements.messageInput.style.height = 'auto';
-        elements.messageInput.style.height = Math.min(elements.messageInput.scrollHeight, 200) + 'px';
-      });
-      
-      // Search events
-      elements.searchInput.addEventListener('input', (e) => {
-        searchConversations(e.target.value);
-      });
-      
-      // New chat button
-      document.getElementById('new-chat-btn').addEventListener('click', createNewConversation);
-      
-      // Clear chat button
-      document.getElementById('clear-chat').addEventListener('click', () => {
-        if (confirm('Are you sure you want to clear this conversation?')) {
-          if (currentConversation) {
-            currentConversation.messages = [];
-            elements.messagesContainer.innerHTML = '';
-            elements.welcomeMessage.classList.remove('hidden');
-            saveConversations();
-          }
+
+        function showAuthInterface() {
+            authSection.classList.remove('hidden');
+            userProfile.classList.add('hidden');
+            adminPanel.classList.add('hidden');
+            usageStats.classList.add('hidden');
         }
-      });
-      
-      // Export events
-      elements.exportBtn.addEventListener('click', () => {
-        elements.exportModal.classList.remove('hidden');
-      });
-      
-      document.getElementById('export-cancel').addEventListener('click', () => {
-        elements.exportModal.classList.add('hidden');
-      });
-      
-      document.getElementById('export-txt').addEventListener('click', () => exportConversation('txt'));
-      document.getElementById('export-json').addEventListener('click', () => exportConversation('json'));
-      document.getElementById('export-html').addEventListener('click', () => exportConversation('html'));
-      
-      // Theme toggle
-      document.getElementById('theme-toggle').addEventListener('click', () => {
-        document.body.classList.toggle('light-mode');
-        const icon = document.querySelector('#theme-toggle i');
-        icon.className = document.body.classList.contains('light-mode') ? 'fas fa-sun' : 'fas fa-moon';
-      });
-      
-      // Model selection
-      document.getElementById('model-select').addEventListener('change', (e) => {
-        elements.currentModelBadge.textContent = e.target.value;
-        if (currentUser) {
-          currentUser.activeModel = e.target.value;
-          updateUser();
+
+        function showUserInterface() {
+            authSection.classList.add('hidden');
+            userProfile.classList.remove('hidden');
+            usageStats.classList.remove('hidden');
+
+            // Update user info
+            document.getElementById('userName').textContent = currentUser.username;
+            document.getElementById('userEmail').textContent = currentUser.email;
+            document.getElementById('currentPlan').textContent = currentUser.plan.charAt(0).toUpperCase() + currentUser.plan.slice(1);
+
+            // Show admin panel if admin
+            if (currentUser.role === 'admin') {
+                adminPanel.classList.remove('hidden');
+            }
+
+            // Update plan-specific UI
+            updatePlanUI();
+            updateUsageStats();
+            loadChatHistory();
         }
-      });
-      
-      // Close modal on outside click
-      elements.exportModal.addEventListener('click', (e) => {
-        if (e.target === elements.exportModal) {
-          elements.exportModal.classList.add('hidden');
+
+        function updatePlanUI() {
+            const modelSelect = document.getElementById('modelSelect');
+            const upgradeBtn = document.getElementById('upgradeBtn');
+
+            if (currentUser.plan === 'paid') {
+                modelSelect.querySelector('option[value="gpt-5o"]').disabled = false;
+                upgradeBtn.classList.add('hidden');
+            } else {
+                modelSelect.querySelector('option[value="gpt-5o"]').disabled = true;
+                upgradeBtn.classList.remove('hidden');
+                
+                // Check message limit
+                if (currentUser.messageCount >= 20) {
+                    modelSelect.value = 'gpt-5o-mini';
+                }
+            }
+
+            updateMessageProgress();
         }
-      });
-      
-      // Initialize demo user
-      const demoUsers = [
-        {
-          id: 'demo-admin',
-          name: 'Demo Admin',
-          email: 'admin@example.com',
-          password: 'admin123',
-          isPaid: true,
-          createdAt: Date.now(),
-          messageCount: 0,
-          lastReset: Date.now()
+
+        function updateMessageProgress() {
+            const messageCount = document.getElementById('messageCount');
+            const messageProgress = document.getElementById('messageProgress');
+
+            if (currentUser.plan === 'free') {
+                const count = currentUser.messageCount;
+                messageCount.textContent = `${count}/20`;
+                messageProgress.style.width = `${(count / 20) * 100}%`;
+            } else {
+                messageCount.textContent = 'Unlimited';
+                messageProgress.style.width = '100%';
+                messageProgress.classList.remove('bg-blue-600');
+                messageProgress.classList.add('bg-green-600');
+            }
         }
-      ];
-      
-      const existingUsers = loadFromStorage('users', []);
-      if (existingUsers.length === 0) {
-        saveToStorage('users', demoUsers);
-      }
-      
-      // Check for existing user session
-      const savedUser = loadFromStorage('currentUser');
-      if (savedUser) {
-        const users = loadFromStorage('users', []);
-        const user = users.find(u => u.id === savedUser.id);
-        if (user) {
-          currentUser = user;
-          showUserProfile();
-          loadUserConversations();
+
+        function updateUsageStats() {
+            document.getElementById('todayMessages').textContent = `${currentUser.messageCount} messages`;
+            document.getElementById('hourMessages').textContent = `${currentUser.messageCount} messages`;
+            document.getElementById('currentModel').textContent = document.getElementById('modelSelect').value.toUpperCase();
         }
-      }
-    });
-  </script>
+
+        function handleSendMessage() {
+            if (isTyping) return;
+
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Check message limits for free users
+            if (currentUser.plan === 'free' && currentUser.messageCount >= 20) {
+                alert('You have reached your message limit. Please upgrade to premium for unlimited messages.');
+                return;
+            }
+
+            // Add user message
+            addMessage(message, 'user');
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            document.getElementById('inputCounter').textContent = '0/1000';
+
+            // Increment message count
+            incrementMessageCount();
+
+            // Generate and show bot response
+            setTimeout(() => {
+                const response = generateResponse(message);
+                addBotMessageWithTyping(response);
+            }, 500);
+        }
+
+        function addMessage(message, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('flex', 'message-bubble');
+            
+            if (sender === 'user') {
+                messageDiv.classList.add('justify-end');
+                messageDiv.innerHTML = `
+                    <div class="flex items-end space-x-2 max-w-xs lg:max-w-md">
+                        <div class="bg-blue-600 text-white p-3 rounded-lg rounded-br-none">
+                            ${message}
+                        </div>
+                        <img src="profile/user.jpg" alt="User" class="w-8 h-8 rounded-full">
+                    </div>
+                `;
+            } else {
+                messageDiv.classList.add('justify-start');
+                messageDiv.innerHTML = `
+                    <div class="flex items-end space-x-2 max-w-xs lg:max-w-md">
+                        <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-8 h-8 rounded-full">
+                        <div class="bg-gray-700 text-white p-3 rounded-lg rounded-bl-none">
+                            <div class="typing-text"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Remove welcome message if it exists
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Save to history
+            chatHistory.push({ message, sender, timestamp: Date.now() });
+            saveChatHistory();
+        }
+
+        function addBotMessageWithTyping(message) {
+            isTyping = true;
+            
+            // Create message container
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('flex', 'justify-start', 'message-bubble');
+            messageDiv.innerHTML = `
+                <div class="flex items-end space-x-2 max-w-xs lg:max-w-md">
+                    <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-8 h-8 rounded-full">
+                    <div class="bg-gray-700 text-white p-3 rounded-lg rounded-bl-none">
+                        <div class="typing-text"></div>
+                    </div>
+                </div>
+            `;
+
+            // Remove welcome message if it exists
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Type message word by word
+            const typingElement = messageDiv.querySelector('.typing-text');
+            const words = message.split(' ');
+            let currentWordIndex = 0;
+
+            const typeNextWords = () => {
+                if (currentWordIndex >= words.length) {
+                    isTyping = false;
+                    // Save to history
+                    chatHistory.push({ message, sender: 'bot', timestamp: Date.now() });
+                    saveChatHistory();
+                    return;
+                }
+
+                // Add 2-4 words at a time
+                const wordsToAdd = Math.min(Math.floor(Math.random() * 3) + 2, words.length - currentWordIndex);
+                const wordsSlice = words.slice(currentWordIndex, currentWordIndex + wordsToAdd);
+                
+                if (currentWordIndex === 0) {
+                    typingElement.textContent = wordsSlice.join(' ');
+                } else {
+                    typingElement.textContent += ' ' + wordsSlice.join(' ');
+                }
+
+                currentWordIndex += wordsToAdd;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                // Continue typing (2-4 words per second = 250-500ms delay)
+                setTimeout(typeNextWords, Math.random() * 250 + 250);
+            };
+
+            typeNextWords();
+        }
+
+        function generateResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // Check for exact matches first
+            for (const [key, response] of Object.entries(qaData)) {
+                if (lowerMessage.includes(key)) {
+                    return response;
+                }
+            }
+
+            // Provide contextual responses based on current model
+            const currentModel = document.getElementById('modelSelect').value;
+            if (currentModel === 'gpt-5o') {
+                return "As GPT-5o, I can provide you with detailed and comprehensive assistance on this topic. " + qaData.default;
+            } else {
+                return "I'm running on GPT-5o Mini. " + qaData.default;
+            }
+        }
+
+        function incrementMessageCount() {
+            currentUser.messageCount++;
+            
+            // Update in storage
+            const data = JSON.parse(localStorage.getItem('chatAppData'));
+            const userIndex = data.users.findIndex(u => u.email === currentUser.email);
+            if (userIndex !== -1) {
+                data.users[userIndex].messageCount = currentUser.messageCount;
+                localStorage.setItem('chatAppData', JSON.stringify(data));
+            }
+            
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            updatePlanUI();
+            updateUsageStats();
+        }
+
+        function resetMessageCountsIfNeeded() {
+            const data = JSON.parse(localStorage.getItem('chatAppData'));
+            const now = Date.now();
+            const oneHour = 60 * 60 * 1000;
+            
+            let updated = false;
+            data.users.forEach(user => {
+                if (user.plan === 'free' && (now - user.lastReset) > oneHour) {
+                    user.messageCount = 0;
+                    user.lastReset = now;
+                    updated = true;
+                }
+            });
+            
+            if (updated) {
+                localStorage.setItem('chatAppData', JSON.stringify(data));
+                if (currentUser && currentUser.plan === 'free') {
+                    currentUser.messageCount = 0;
+                    currentUser.lastReset = now;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    updatePlanUI();
+                    updateUsageStats();
+                }
+            }
+        }
+
+        function handlePayment(e) {
+            e.preventDefault();
+            
+            // Simulate payment processing
+            const cardNumber = document.getElementById('cardNumber').value;
+            const expiryDate = document.getElementById('expiryDate').value;
+            const cvc = document.getElementById('cvc').value;
+            const cardName = document.getElementById('cardName').value;
+
+            if (!cardNumber || !expiryDate || !cvc || !cardName) {
+                alert('Please fill in all payment fields');
+                return;
+            }
+
+            // Simulate successful payment
+            setTimeout(() => {
+                // Update user to paid
+                currentUser.plan = 'paid';
+                
+                const data = JSON.parse(localStorage.getItem('chatAppData'));
+                const userIndex = data.users.findIndex(u => u.email === currentUser.email);
+                if (userIndex !== -1) {
+                    data.users[userIndex].plan = 'paid';
+                    localStorage.setItem('chatAppData', JSON.stringify(data));
+                }
+                
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                paymentModal.classList.add('hidden');
+                updatePlanUI();
+                alert('Payment successful! You now have premium access.');
+            }, 1000);
+        }
+
+        function handleMakeUserPaid() {
+            const email = document.getElementById('adminUserEmail').value;
+            if (!email) {
+                alert('Please enter a user email');
+                return;
+            }
+
+            const data = JSON.parse(localStorage.getItem('chatAppData'));
+            const userIndex = data.users.findIndex(u => u.email === email);
+            
+            if (userIndex === -1) {
+                alert('User not found');
+                return;
+            }
+
+            data.users[userIndex].plan = 'paid';
+            localStorage.setItem('chatAppData', JSON.stringify(data));
+            
+            // Update current user if it's the same user
+            if (currentUser && currentUser.email === email) {
+                currentUser.plan = 'paid';
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updatePlanUI();
+            }
+
+            alert(`User ${email} has been upgraded to paid plan`);
+            document.getElementById('adminUserEmail').value = '';
+        }
+
+        function handleModelChange() {
+            updateUsageStats();
+        }
+
+        function clearChat() {
+            chatHistory = [];
+            saveChatHistory();
+            chatContainer.innerHTML = `
+                <div id="welcomeMessage" class="text-center py-12">
+                    <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-16 h-16 rounded-full mx-auto mb-4">
+                    <h2 class="text-2xl font-bold mb-2">Welcome to GPT-5o</h2>
+                    <p class="text-gray-400">Start a conversation with our AI assistant</p>
+                </div>
+            `;
+        }
+
+        function exportChat() {
+            if (chatHistory.length === 0) {
+                alert('No chat history to export');
+                return;
+            }
+
+            const chatData = {
+                user: currentUser.username,
+                exported: new Date().toISOString(),
+                messages: chatHistory
+            };
+
+            const blob = new Blob([JSON.stringify(chatData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `chat-history-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function saveChatHistory() {
+            if (currentUser) {
+                localStorage.setItem(`chatHistory_${currentUser.email}`, JSON.stringify(chatHistory));
+            }
+        }
+
+        function loadChatHistory() {
+            if (currentUser) {
+                const saved = localStorage.getItem(`chatHistory_${currentUser.email}`);
+                if (saved) {
+                    chatHistory = JSON.parse(saved);
+                    reconstructChatUI();
+                }
+            }
+        }
+
+        function reconstructChatUI() {
+            chatContainer.innerHTML = '';
+            
+            if (chatHistory.length === 0) {
+                chatContainer.innerHTML = `
+                    <div id="welcomeMessage" class="text-center py-12">
+                        <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-16 h-16 rounded-full mx-auto mb-4">
+                        <h2 class="text-2xl font-bold mb-2">Welcome to GPT-5o</h2>
+                        <p class="text-gray-400">Start a conversation with our AI assistant</p>
+                    </div>
+                `;
+                return;
+            }
+
+            chatHistory.forEach(chat => {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('flex', 'message-bubble');
+                
+                if (chat.sender === 'user') {
+                    messageDiv.classList.add('justify-end');
+                    messageDiv.innerHTML = `
+                        <div class="flex items-end space-x-2 max-w-xs lg:max-w-md">
+                            <div class="bg-blue-600 text-white p-3 rounded-lg rounded-br-none">
+                                ${chat.message}
+                            </div>
+                            <img src="profile/user.jpg" alt="User" class="w-8 h-8 rounded-full">
+                        </div>
+                    `;
+                } else {
+                    messageDiv.classList.add('justify-start');
+                    messageDiv.innerHTML = `
+                        <div class="flex items-end space-x-2 max-w-xs lg:max-w-md">
+                            <img src="profile/gpt-5o.jpg" alt="GPT-5o" class="w-8 h-8 rounded-full">
+                            <div class="bg-gray-700 text-white p-3 rounded-lg rounded-bl-none">
+                                ${chat.message}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                chatContainer.appendChild(messageDiv);
+            });
+
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Reset message counts every hour
+        setInterval(resetMessageCountsIfNeeded, 60 * 60 * 1000);
+    </script>
 </body>
 </html>
