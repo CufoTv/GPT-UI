@@ -2,873 +2,1171 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>GPT-5o ChatBot (Demo)</title>
+  <title>Enhanced GPT-5o ChatBot - Modern UI</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <!-- Material icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-  <style>/* ==============================================
-   Reset & Base Styles
-============================================== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+  
+  <!-- External Libraries -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --dark-bg: #0f0f23;
+      --dark-surface: #1a1a2e;
+      --dark-surface-light: #16213e;
+      --accent-blue: #4f46e5;
+      --accent-purple: #7c3aed;
+      --text-light: #e2e8f0;
+      --text-muted: #94a3b8;
+    }
 
-html, body {
-  height: 100%;
-  width: 100%;
-  scroll-behavior: smooth;
-  transition: background 0.3s, color 0.3s;
-}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-body {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  background: linear-gradient(135deg, #1e1e2f, #2c2c3e);
-  color: #fff;
-  padding: 10px;
-  overflow-x: hidden;
-}
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--dark-bg);
+      color: var(--text-light);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
 
-body.light-mode {
-  background: linear-gradient(135deg, #f2f2f2, #ffffff);
-  color: #222;
-}
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-a { text-decoration: none; color: inherit; }
-button { cursor: pointer; outline: none; border: none; }
+    .gradient-text {
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-/* ==============================================
-   Chat App Container
-============================================== */
-.chat-app {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 950px;
-  height: 95vh;
-  border-radius: 20px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #2c2c3e, #1e1e2f);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
-  transition: all 0.3s ease;
-  animation: fadeIn 0.6s ease forwards;
-}
+    .chat-bubble-user {
+      background: var(--primary-gradient);
+      color: white;
+      border-radius: 18px 18px 4px 18px;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
 
-body.light-mode .chat-app {
-  background: linear-gradient(135deg, #fff, #f0f0f0);
-}
+    .chat-bubble-bot {
+      background: var(--dark-surface-light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px 18px 18px 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
 
-/* ==============================================
-   Profile Panel & Admin Panel
-============================================== */
-#profile-panel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 20px;
-  background: #3b3b55;
-  border-bottom: 1px solid #444;
-  transition: all 0.3s ease;
-  animation: slideDown 0.3s ease forwards;
-}
+    .typing-animation {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+    }
 
-body.light-mode #profile-panel {
-  background: #eaeaea;
-  color: #222;
-}
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      animation: typing 1.4s infinite ease-in-out;
+    }
 
-#profile-panel span {
-  font-weight: bold;
-  font-size: 1rem;
-}
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
-#admin-panel {
-  display: flex;
-  flex-direction: column;
-  margin-top: 10px;
-  transition: all 0.3s ease;
-}
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+      30% { transform: translateY(-10px); opacity: 1; }
+    }
 
-#admin-panel input,
-#admin-panel button {
-  padding: 10px 14px;
-  margin-bottom: 8px;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-}
+    .message-fade-in {
+      animation: fadeInUp 0.5s ease forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
 
-#admin-panel input:focus {
-  box-shadow: 0 0 10px #6c9cff;
-}
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-#admin-panel button {
-  background: #ff7f50;
-  color: #fff;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
+    .sidebar-transition {
+      transition: transform 0.3s ease-in-out;
+    }
 
-#admin-panel button:hover {
-  background: #ff956a;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255,127,80,0.5);
-}
+    .search-highlight {
+      background: rgba(255, 255, 0, 0.3);
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
 
-/* ==============================================
-   Chat Container
-============================================== */
-.chat-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 20px;
-  overflow-y: auto;
-  background: #1f1f2c;
-  border-radius: 0;
-  transition: all 0.3s ease;
-  scrollbar-width: thin;
-}
+    .conversation-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateX(4px);
+    }
 
-body.light-mode .chat-container {
-  background: #f9f9f9;
-}
+    .model-badge {
+      background: var(--secondary-gradient);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
 
-/* Custom Scrollbar Desktop */
-.chat-container::-webkit-scrollbar {
-  width: 10px;
-}
-.chat-container::-webkit-scrollbar-track {
-  background: #2c2c3e;
-  border-radius: 5px;
-}
-.chat-container::-webkit-scrollbar-thumb {
-  background: #6c9cff;
-  border-radius: 5px;
-}
-body.light-mode .chat-container::-webkit-scrollbar-track { background: #eee; }
-body.light-mode .chat-container::-webkit-scrollbar-thumb { background: #84aaff; }
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s infinite;
+    }
 
-/* ==============================================
-   Chat Bubbles
-============================================== */
-.chat {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  opacity: 0;
-  animation: fadeInUp 0.5s forwards;
-}
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
 
-.chat.outgoing {
-  flex-direction: row-reverse;
-}
+    .input-glow:focus {
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1), 0 0 20px rgba(79, 70, 229, 0.2);
+    }
 
-.bubble {
-  max-width: 70%;
-  padding: 14px 22px;
-  border-radius: 25px;
-  background: #4c4c6a;
-  color: #fff;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  word-wrap: break-word;
-  position: relative;
-  transition: all 0.3s ease;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-}
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
 
-body.light-mode .bubble { background: #d9d9ff; color: #222; }
-.chat.outgoing .bubble { background: #6c9cff; }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+    }
 
-.chat:hover .bubble {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(108,156,255,0.4);
-}
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-light);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
 
-.chat img.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
 
-.chat img.avatar:hover { transform: scale(1.05); }
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 6px;
+    }
 
-/* ==============================================
-   Typing Animation
-============================================== */
-.typing-animation {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  height: 18px;
-}
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: var(--dark-surface);
+    }
 
-.typing-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #fff;
-  animation: typing 1s infinite;
-}
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: var(--accent-blue);
+      border-radius: 3px;
+    }
 
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
-body.light-mode .typing-dot { background: #222; }
+    .code-block {
+      background: var(--dark-surface);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.875rem;
+      margin: 8px 0;
+      overflow-x: auto;
+    }
 
-@keyframes typing {
-  0%,60%,100% { transform: translateY(0); opacity: 0.3; }
-  30% { transform: translateY(-5px); opacity: 1; }
-}
+    .message-actions {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
 
-/* ==============================================
-   Input Area
-============================================== */
-.input-area {
-  display: flex;
-  gap: 10px;
-  padding: 15px;
-  background: #2c2c3e;
-  border-top: 1px solid #444;
-  transition: all 0.3s ease;
-}
+    .message:hover .message-actions {
+      opacity: 1;
+    }
 
-body.light-mode .input-area { background: #eee; }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
 
-.input-area input {
-  flex: 1;
-  padding: 14px 18px;
-  border-radius: 25px;
-  border: none;
-  background: rgba(255,255,255,0.05);
-  color: inherit;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
+    .export-modal {
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+    }
 
-.input-area input:focus {
-  background: rgba(255,255,255,0.15);
-  box-shadow: 0 0 8px #6c9cff;
-}
+    .modal-content {
+      background: var(--dark-surface);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
 
-body.light-mode .input-area input { background: rgba(0,0,0,0.05); }
-
-.input-area button {
-  padding: 12px 24px;
-  border-radius: 25px;
-  background: #6c9cff;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-
-.input-area button:hover {
-  transform: translateY(-2px);
-  background: #84aaff;
-  box-shadow: 0 4px 15px rgba(108,156,255,0.5);
-}
-
-/* ==============================================
-   Default Text
-============================================== */
-.default-text {
-  text-align: center;
-  opacity: 0.6;
-  animation: fadeIn 0.5s ease forwards;
-}
-
-/* ==============================================
-   Animations & Shadows
-============================================== */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* ==============================================
-   Responsive & Mobile-First
-============================================== */
-@media (max-width: 1024px) {
-  .chat-app { max-width: 90%; }
-  .bubble { max-width: 75%; font-size: 0.95rem; }
-}
-
-@media (max-width: 768px) {
-  .chat-app { height: 90vh; }
-  #profile-panel { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .bubble { max-width: 80%; }
-}
-
-@media (max-width: 480px) {
-  .chat-app { width: 100%; height: 95vh; border-radius: 15px; }
-  .bubble { max-width: 90%; font-size: 0.9rem; }
-  .input-area input { font-size: 0.95rem; }
-  .input-area button { font-size: 0.95rem; padding: 10px 18px; }
-  #admin-panel input, #admin-panel button { font-size: 0.9rem; }
-}
-
-/* ==============================================
-   Animated Background Gradient
-============================================== */
-body {
-  background: linear-gradient(-45deg, #1e1e2f, #2c2c3e, #3b3b55, #2c2c3e);
-  background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
-}
-
-@keyframes gradientBG {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* ==============================================
-   Extra UX Microinteractions
-============================================== */
-.bubble::after {
-  content: "";
-  position: absolute;
-  width: 10px; height: 10px;
-  background: inherit;
-  bottom: -5px;
-  left: 10px;
-  clip-path: polygon(50% 0, 0% 100%, 100% 100%);
-  opacity: 0.8;
-  transition: all 0.3s ease;
-}
-
-.chat.outgoing .bubble::after {
-  left: auto; right: 10px;
-}
-
-.chat:hover .bubble::after {
-  transform: translateY(-2px);
-}
-
-#model-select {
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: #444;
-  color: #fff;
-  transition: all 0.3s ease;
-}
-
-#model-select:hover { box-shadow: 0 0 10px #6c9cff; }
-body.light-mode #model-select { background: #ddd; color: #222; }
-
-/* ====== END OF RESPONSIVE, DYNAMIC, ANIMATED UX/UI ====== */</style>
+    /* PDF Export Optimizations */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+        overflow: visible !important;
+      }
+      
+      .sidebar {
+        display: none !important;
+      }
+      
+      .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+      }
+      
+      .chat-container {
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
+      }
+      
+      .message {
+        break-inside: avoid;
+        margin-bottom: 16px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div id="app">
-    <!-- Left: auth / profile / admin -->
-    <aside class="sidebar">
-      <div class="brand">
-        <h2>GPT-5o</h2>
-        <p class="subtitle">Chat demo</p>
-      </div>
-
-      <div id="auth-container">
-        <!-- Login form -->
-        <div id="login-form" class="auth-box">
-          <h3>Login</h3>
-          <input id="login-email" placeholder="Email" type="email" />
-          <input id="login-pass" placeholder="Password" type="password" />
-          <button id="login-btn">Login</button>
-          <p class="small">No account? <a href="#" id="show-signup">Sign up</a></p>
+  <div id="app" class="flex h-screen">
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar sidebar-transition fixed lg:relative z-50 w-80 h-full glass-effect border-r border-gray-700 flex flex-col">
+      <!-- Header -->
+      <div class="p-6 border-b border-gray-700">
+        <div class="flex items-center justify-between mb-4">
+          <h1 class="text-2xl font-bold gradient-text">GPT-5o Chat</h1>
+          <button id="sidebar-close" class="lg:hidden text-gray-400 hover:text-white">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
-
-        <!-- Signup -->
-        <div id="signup-form" class="auth-box hidden">
-          <h3>Sign up</h3>
-          <input id="signup-name" placeholder="Full name" type="text" />
-          <input id="signup-email" placeholder="Email" type="email" />
-          <input id="signup-pass" placeholder="Password" type="password" />
-          <button id="signup-btn">Create account</button>
-          <p class="small">Have account? <a href="#" id="show-login">Login</a></p>
+        <div class="flex items-center gap-2">
+          <div class="status-indicator"></div>
+          <span class="text-sm text-gray-400">Online</span>
+          <div class="model-badge ml-auto" id="current-model-badge">GPT-5o</div>
         </div>
       </div>
 
-      <div id="profile-panel" class="hidden">
-        <div class="profile">
-          <img src="profile/user.jpg" alt="avatar" />
+      <!-- Search -->
+      <div class="p-4 border-b border-gray-700">
+        <div class="relative">
+          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          <input id="search-input" type="text" placeholder="Search conversations..." 
+                 class="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+      </div>
+
+      <!-- Auth Section -->
+      <div id="auth-section" class="p-4">
+        <div id="login-form" class="space-y-4">
+          <h3 class="text-lg font-semibold mb-4">Sign In</h3>
+          <input id="login-email" type="email" placeholder="Email" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 input-glow">
+          <input id="login-password" type="password" placeholder="Password" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 input-glow">
+          <button id="login-btn" class="btn-primary w-full">Sign In</button>
+          <p class="text-sm text-gray-400 text-center">
+            Don't have an account? <button id="show-signup" class="text-blue-400 hover:underline">Sign up</button>
+          </p>
+        </div>
+
+        <div id="signup-form" class="space-y-4 hidden">
+          <h3 class="text-lg font-semibold mb-4">Create Account</h3>
+          <input id="signup-name" type="text" placeholder="Full Name" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 input-glow">
+          <input id="signup-email" type="email" placeholder="Email" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 input-glow">
+          <input id="signup-password" type="password" placeholder="Password" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 input-glow">
+          <button id="signup-btn" class="btn-primary w-full">Create Account</button>
+          <p class="text-sm text-gray-400 text-center">
+            Already have an account? <button id="show-login" class="text-blue-400 hover:underline">Sign in</button>
+          </p>
+        </div>
+      </div>
+
+      <!-- User Profile (hidden initially) -->
+      <div id="user-profile" class="p-4 border-b border-gray-700 hidden">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+            <i class="fas fa-user text-white"></i>
+          </div>
           <div>
-            <div id="welcome-line">Welcome, User</div>
-            <div id="email-line" class="small dim"></div>
+            <div id="user-name" class="font-semibold">User</div>
+            <div id="user-email" class="text-sm text-gray-400"></div>
+          </div>
+        </div>
+        
+        <div class="space-y-2 mb-4">
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-400">Messages today:</span>
+            <span id="message-count">0</span>
+          </div>
+          <div class="w-full bg-gray-700 rounded-full h-2">
+            <div id="message-progress" class="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full" style="width: 0%"></div>
           </div>
         </div>
 
-        <div class="model-block">
-          <label>Active model:</label>
-          <div class="model-controls">
-            <select id="model-select">
-              <option value="GPT-5o">GPT-5o</option>
-              <option value="GPT-5o-mini">GPT-5o-mini</option>
-            </select>
-            <button id="logout-btn" class="btn-ghost">Logout</button>
-          </div>
-          <div class="small dim">Free: 20 messages/hour on GPT-5o, auto-switch to GPT-5o-mini after limit. Paid: unlimited and can switch anytime.</div>
-        </div>
-
-        <div id="admin-panel" class="hidden">
-          <h4>Admin</h4>
-          <div>Make user paid (by email):</div>
-          <input id="admin-user-email" placeholder="user email" />
-          <button id="admin-mark-paid">Mark Paid</button>
-          <div class="small dim">Seed admin: admin@gmail.com / Admin123</div>
-        </div>
-
-        <div id="usage-stats" class="stats">
-          <div>Messages this hour: <span id="msg-count">0</span></div>
-          <div>Model: <span id="current-model-display">GPT-5o</span></div>
-        </div>
-
-        <div class="small dim" style="margin-top:12px;">
-          App stores signups in this browser (localStorage). To persist to a server you'd need a backend.
+        <div class="space-y-2">
+          <select id="model-select" class="w-full p-2 bg-gray-800 border border-gray-600 rounded-lg text-white">
+            <option value="GPT-5o">GPT-5o (Premium)</option>
+            <option value="GPT-5o-mini">GPT-5o-mini (Fast)</option>
+          </select>
+          <button id="logout-btn" class="btn-secondary w-full">
+            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+          </button>
         </div>
       </div>
-    </aside>
 
-    <!-- Right: chat -->
-    <main class="main">
-      <div class="chat-container"></div>
-
-      <div class="typing-container">
-        <div class="typing-content">
-          <div class="typing-textarea">
-            <textarea id="chat-input" spellcheck="false" placeholder="Ask a question..." required></textarea>
-            <span id="send-btn" class="material-symbols-rounded">send</span>
+      <!-- Conversation History -->
+      <div class="flex-1 overflow-y-auto scrollbar-thin">
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-semibold text-gray-300">Conversations</h4>
+            <button id="new-chat-btn" class="text-gray-400 hover:text-white">
+              <i class="fas fa-plus"></i>
+            </button>
           </div>
-          <div class="typing-controls">
-            <span id="theme-btn" class="material-symbols-rounded">light_mode</span>
-            <span id="delete-btn" class="material-symbols-rounded">delete</span>
+          <div id="conversation-list" class="space-y-2">
+            <!-- Conversations will be populated here -->
           </div>
         </div>
       </div>
-    </main>
+
+      <!-- Export Options -->
+      <div class="p-4 border-t border-gray-700">
+        <button id="export-btn" class="btn-secondary w-full">
+          <i class="fas fa-download mr-2"></i>Export Chat
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content flex-1 flex flex-col lg:ml-0">
+      <!-- Header -->
+      <div class="flex items-center justify-between p-4 border-b border-gray-700 glass-effect">
+        <div class="flex items-center gap-4">
+          <button id="sidebar-toggle" class="lg:hidden text-gray-400 hover:text-white">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h2 class="text-xl font-semibold">New Conversation</h2>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="theme-toggle" class="btn-secondary">
+            <i class="fas fa-moon"></i>
+          </button>
+          <button id="clear-chat" class="btn-secondary">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat Container -->
+      <div id="chat-container" class="flex-1 overflow-y-auto p-6 scrollbar-thin">
+        <div class="max-w-4xl mx-auto">
+          <div id="welcome-message" class="text-center py-12">
+            <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <i class="fas fa-robot text-2xl text-white"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-4 gradient-text">Welcome to GPT-5o</h2>
+            <p class="text-gray-400 max-w-md mx-auto">Start a conversation by typing a message below. I'm here to help with any questions or tasks you have.</p>
+          </div>
+          
+          <div id="messages-container">
+            <!-- Messages will be populated here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="p-4 border-t border-gray-700 glass-effect">
+        <div class="max-w-4xl mx-auto">
+          <div class="flex items-end gap-4">
+            <div class="flex-1 relative">
+              <textarea id="message-input" 
+                        placeholder="Type your message here..." 
+                        class="w-full p-4 bg-gray-800 border border-gray-600 rounded-2xl text-white placeholder-gray-400 resize-none input-glow pr-12"
+                        rows="1"
+                        style="min-height: 56px; max-height: 200px;"></textarea>
+              <button id="send-btn" class="absolute right-3 bottom-3 w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white hover:scale-105 transition-transform">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+          <div class="text-xs text-gray-500 mt-2 text-center">
+            Press Shift+Enter for new line, Enter to send
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script>// script.js
-// Main client-side demo implementing signup/login, free/paid models, message limits, and chat logic.
+  <!-- Export Modal -->
+  <div id="export-modal" class="export-modal fixed inset-0 z-50 flex items-center justify-center hidden">
+    <div class="modal-content p-6 max-w-md w-full mx-4">
+      <h3 class="text-xl font-semibold mb-4">Export Conversation</h3>
+      <div class="space-y-4">
+        <button id="export-txt" class="btn-secondary w-full text-left">
+          <i class="fas fa-file-alt mr-3"></i>Export as Text
+        </button>
+        <button id="export-json" class="btn-secondary w-full text-left">
+          <i class="fas fa-file-code mr-3"></i>Export as JSON
+        </button>
+        <button id="export-html" class="btn-secondary w-full text-left">
+          <i class="fas fa-file-code mr-3"></i>Export as HTML
+        </button>
+      </div>
+      <button id="export-cancel" class="btn-secondary w-full mt-4">Cancel</button>
+    </div>
+  </div>
 
-// ======= Elements =======
-const loginForm = document.getElementById("login-form");
-const signupForm = document.getElementById("signup-form");
-const showSignupLink = document.getElementById("show-signup");
-const showLoginLink = document.getElementById("show-login");
-const loginBtn = document.getElementById("login-btn");
-const signupBtn = document.getElementById("signup-btn");
-const logoutBtn = document.getElementById("logout-btn");
+  <script>
+    // Application State
+    let currentUser = null;
+    let conversations = [];
+    let currentConversation = null;
+    let isTyping = false;
+    let messageCount = 0;
+    const MAX_FREE_MESSAGES = 20;
 
-const loginEmail = document.getElementById("login-email");
-const loginPass = document.getElementById("login-pass");
-const signupName = document.getElementById("signup-name");
-const signupEmail = document.getElementById("signup-email");
-const signupPass = document.getElementById("signup-pass");
+    // DOM Elements
+    const elements = {
+      sidebar: document.getElementById('sidebar'),
+      sidebarToggle: document.getElementById('sidebar-toggle'),
+      sidebarClose: document.getElementById('sidebar-close'),
+      loginForm: document.getElementById('login-form'),
+      signupForm: document.getElementById('signup-form'),
+      userProfile: document.getElementById('user-profile'),
+      authSection: document.getElementById('auth-section'),
+      messagesContainer: document.getElementById('messages-container'),
+      messageInput: document.getElementById('message-input'),
+      sendBtn: document.getElementById('send-btn'),
+      welcomeMessage: document.getElementById('welcome-message'),
+      searchInput: document.getElementById('search-input'),
+      conversationList: document.getElementById('conversation-list'),
+      exportModal: document.getElementById('export-modal'),
+      currentModelBadge: document.getElementById('current-model-badge'),
+      messageCount: document.getElementById('message-count'),
+      messageProgress: document.getElementById('message-progress')
+    };
 
-const profilePanel = document.getElementById("profile-panel");
-const welcomeLine = document.getElementById("welcome-line");
-const emailLine = document.getElementById("email-line");
-const modelSelect = document.getElementById("model-select");
-const adminPanel = document.getElementById("admin-panel");
-const adminMarkPaidBtn = document.getElementById("admin-mark-paid");
-const adminUserEmailInput = document.getElementById("admin-user-email");
-const msgCountEl = document.getElementById("msg-count");
-const currentModelDisplay = document.getElementById("current-model-display");
+    // Sample QA Data
+    const qaData = {
+      "hello": "Hello! How can I help you today?",
+      "how are you": "I'm doing great, thank you for asking! How are you?",
+      "what is ai": "AI (Artificial Intelligence) refers to the simulation of human intelligence in machines that are programmed to think and learn like humans.",
+      "tell me a joke": "Why don't scientists trust atoms? Because they make up everything!",
+      "default": "I'm here to help you with any questions you might have. Feel free to ask me anything!"
+    };
 
-const chatContainer = document.querySelector(".chat-container");
-const chatInput = document.getElementById("chat-input");
-const sendButton = document.getElementById("send-btn");
-const themeBtn = document.getElementById("theme-btn");
-const deleteBtn = document.getElementById("delete-btn");
-
-// ======= App state =======
-let qaData = { "GPT-5o": [] }; // loaded from gpt-5o.json
-let seededUsers = []; // initial users from data.json seed
-let currentUser = null; // { name, email, passwordHash, paid:bool, createdAt, messageLog: [] }
-let isBotTyping = false;
-
-// constants
-const FREE_LIMIT_PER_HOUR = 20;
-const MODEL_PREMIUM = "GPT-5o";
-const MODEL_CHEAP = "GPT-5o-mini";
-
-// ======= Utility helpers =======
-function $(sel){ return document.querySelector(sel); }
-function saveUsersToLocal(users) {
-  localStorage.setItem("users", JSON.stringify(users));
-}
-function loadUsersFromLocal() {
-  try { return JSON.parse(localStorage.getItem("users") || "[]"); } catch(e){ return []; }
-}
-function setCurrentUser(user) {
-  currentUser = user;
-  localStorage.setItem("currentUser", JSON.stringify(user));
-}
-function getCurrentUserFromStorage() {
-  try { return JSON.parse(localStorage.getItem("currentUser") || "null"); } catch(e){ return null; }
-}
-function hashSimple(s) { return btoa(s); } // demo only, not secure
-
-// ======= Message tracking =======
-function recordMessageSent(user) {
-  if (!user.messageLog) user.messageLog = [];
-  user.messageLog.push(Date.now());
-  const users = loadUsersFromLocal();
-  const idx = users.findIndex(u => u.email === user.email);
-  if (idx !== -1) {
-    users[idx] = user;
-    saveUsersToLocal(users);
-  }
-  setCurrentUser(user);
-}
-
-function messagesInLastHour(user) {
-  if (!user || !user.messageLog) return 0;
-  const oneHourAgo = Date.now() - (60 * 60 * 1000);
-  user.messageLog = user.messageLog.filter(ts => ts >= oneHourAgo);
-  return user.messageLog.length;
-}
-
-function updateModelAndStatsUI() {
-  if (!currentUser) return;
-  const count = messagesInLastHour(currentUser);
-  msgCountEl.textContent = count;
-
-  if (!currentUser.paid) {
-    if (count >= FREE_LIMIT_PER_HOUR) {
-      currentUser.activeModel = MODEL_CHEAP;
-      modelSelect.value = MODEL_CHEAP;
-      modelSelect.disabled = true;
-    } else {
-      if (!currentUser.activeModel) currentUser.activeModel = MODEL_PREMIUM;
-      modelSelect.value = currentUser.activeModel;
-      modelSelect.disabled = true;
+    // Utility Functions
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
-  } else {
-    currentUser.activeModel = currentUser.activeModel || MODEL_PREMIUM;
-    modelSelect.value = currentUser.activeModel;
-    modelSelect.disabled = false;
-  }
 
-  currentModelDisplay.textContent = currentUser.activeModel || MODEL_PREMIUM;
-  setCurrentUser(currentUser);
-}
+    function saveToStorage(key, data) {
+      localStorage.setItem(key, JSON.stringify(data));
+    }
 
-// ======= Load initial JSONs =======
-async function loadSeedData() {
-  try {
-    const res = await fetch("data.json");
-    if (res.ok) {
-      const d = await res.json();
-      seededUsers = d.users || [];
-      const localUsers = loadUsersFromLocal();
-      seededUsers.forEach(su => {
-        if (!localUsers.some(u => u.email === su.email)) {
-          localUsers.push(su);
+    function loadFromStorage(key, defaultValue = null) {
+      try {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : defaultValue;
+      } catch (e) {
+        return defaultValue;
+      }
+    }
+
+    function formatTime(timestamp) {
+      return new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+
+    // Authentication Functions
+    function showLogin() {
+      elements.loginForm.classList.remove('hidden');
+      elements.signupForm.classList.add('hidden');
+    }
+
+    function showSignup() {
+      elements.signupForm.classList.remove('hidden');
+      elements.loginForm.classList.add('hidden');
+    }
+
+    function login(email, password) {
+      const users = loadFromStorage('users', []);
+      const user = users.find(u => u.email === email && u.password === password);
+      
+      if (user) {
+        currentUser = user;
+        showUserProfile();
+        loadUserConversations();
+        saveToStorage('currentUser', currentUser);
+        return true;
+      }
+      return false;
+    }
+
+    function signup(name, email, password) {
+      const users = loadFromStorage('users', []);
+      
+      if (users.find(u => u.email === email)) {
+        return false; // User already exists
+      }
+
+      const newUser = {
+        id: generateId(),
+        name,
+        email,
+        password,
+        isPaid: false,
+        createdAt: Date.now(),
+        messageCount: 0,
+        lastReset: Date.now()
+      };
+
+      users.push(newUser);
+      saveToStorage('users', users);
+      
+      currentUser = newUser;
+      showUserProfile();
+      saveToStorage('currentUser', currentUser);
+      return true;
+    }
+
+    function logout() {
+      currentUser = null;
+      conversations = [];
+      currentConversation = null;
+      localStorage.removeItem('currentUser');
+      
+      elements.userProfile.classList.add('hidden');
+      elements.authSection.classList.remove('hidden');
+      elements.messagesContainer.innerHTML = '';
+      elements.welcomeMessage.classList.remove('hidden');
+      
+      showLogin();
+    }
+
+    function showUserProfile() {
+      elements.authSection.classList.add('hidden');
+      elements.userProfile.classList.remove('hidden');
+      
+      document.getElementById('user-name').textContent = currentUser.name;
+      document.getElementById('user-email').textContent = currentUser.email;
+      
+      updateMessageCount();
+    }
+
+    function updateMessageCount() {
+      if (!currentUser) return;
+      
+      // Reset count if it's a new day
+      const now = Date.now();
+      const oneDay = 24 * 60 * 60 * 1000;
+      
+      if (now - currentUser.lastReset > oneDay) {
+        currentUser.messageCount = 0;
+        currentUser.lastReset = now;
+        updateUser();
+      }
+      
+      elements.messageCount.textContent = currentUser.messageCount;
+      const progress = Math.min((currentUser.messageCount / MAX_FREE_MESSAGES) * 100, 100);
+      elements.messageProgress.style.width = progress + '%';
+    }
+
+    function updateUser() {
+      const users = loadFromStorage('users', []);
+      const index = users.findIndex(u => u.id === currentUser.id);
+      if (index !== -1) {
+        users[index] = currentUser;
+        saveToStorage('users', users);
+        saveToStorage('currentUser', currentUser);
+      }
+    }
+
+    // Conversation Functions
+    function createNewConversation() {
+      const conversation = {
+        id: generateId(),
+        title: 'New Conversation',
+        messages: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
+      
+      conversations.unshift(conversation);
+      currentConversation = conversation;
+      
+      elements.messagesContainer.innerHTML = '';
+      elements.welcomeMessage.classList.remove('hidden');
+      
+      saveConversations();
+      updateConversationList();
+    }
+
+    function loadUserConversations() {
+      if (!currentUser) return;
+      
+      conversations = loadFromStorage(`conversations_${currentUser.id}`, []);
+      updateConversationList();
+      
+      if (conversations.length === 0) {
+        createNewConversation();
+      } else {
+        currentConversation = conversations[0];
+        loadConversation(currentConversation);
+      }
+    }
+
+    function saveConversations() {
+      if (!currentUser) return;
+      saveToStorage(`conversations_${currentUser.id}`, conversations);
+    }
+
+    function loadConversation(conversation) {
+      currentConversation = conversation;
+      elements.messagesContainer.innerHTML = '';
+      elements.welcomeMessage.classList.add('hidden');
+      
+      conversation.messages.forEach(message => {
+        displayMessage(message);
+      });
+      
+      scrollToBottom();
+    }
+
+    function updateConversationList() {
+      elements.conversationList.innerHTML = '';
+      
+      conversations.forEach(conv => {
+        const div = document.createElement('div');
+        div.className = 'conversation-item p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700';
+        
+        if (currentConversation && conv.id === currentConversation.id) {
+          div.classList.add('bg-gray-700');
+        }
+        
+        div.innerHTML = `
+          <div class="font-medium text-sm truncate">${conv.title}</div>
+          <div class="text-xs text-gray-400 mt-1">${formatTime(conv.updatedAt)}</div>
+        `;
+        
+        div.addEventListener('click', () => {
+          loadConversation(conv);
+          updateConversationList();
+          
+          // Close sidebar on mobile
+          if (window.innerWidth < 1024) {
+            elements.sidebar.classList.remove('open');
+          }
+        });
+        
+        elements.conversationList.appendChild(div);
+      });
+    }
+
+    // Message Functions
+    function addMessage(content, isUser = false) {
+      if (!currentConversation) {
+        createNewConversation();
+      }
+      
+      const message = {
+        id: generateId(),
+        content,
+        isUser,
+        timestamp: Date.now()
+      };
+      
+      currentConversation.messages.push(message);
+      currentConversation.updatedAt = Date.now();
+      
+      // Update conversation title if it's the first user message
+      if (isUser && currentConversation.messages.filter(m => m.isUser).length === 1) {
+        currentConversation.title = content.substring(0, 50) + (content.length > 50 ? '...' : '');
+      }
+      
+      displayMessage(message);
+      saveConversations();
+      updateConversationList();
+      
+      return message;
+    }
+
+    function displayMessage(message) {
+      elements.welcomeMessage.classList.add('hidden');
+      
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message flex gap-4 mb-6 message-fade-in ${message.isUser ? 'justify-end' : 'justify-start'}`;
+      
+      const avatarDiv = document.createElement('div');
+      avatarDiv.className = `w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+        message.isUser ? 'bg-gradient-to-r from-blue-500 to-purple-600 order-2' : 'bg-gray-700'
+      }`;
+      avatarDiv.innerHTML = `<i class="fas ${message.isUser ? 'fa-user' : 'fa-robot'} text-white text-sm"></i>`;
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = `max-w-2xl ${message.isUser ? 'order-1' : 'order-2'}`;
+      
+      const bubbleDiv = document.createElement('div');
+      bubbleDiv.className = `p-4 ${message.isUser ? 'chat-bubble-user' : 'chat-bubble-bot'}`;
+      
+      // Process content for code blocks and formatting
+      const processedContent = processMessageContent(message.content);
+      bubbleDiv.innerHTML = processedContent;
+      
+      const timeDiv = document.createElement('div');
+      timeDiv.className = `text-xs text-gray-500 mt-2 ${message.isUser ? 'text-right' : 'text-left'}`;
+      timeDiv.textContent = formatTime(message.timestamp);
+      
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = `message-actions flex gap-2 mt-2 ${message.isUser ? 'justify-end' : 'justify-start'}`;
+      
+      if (!message.isUser) {
+        actionsDiv.innerHTML = `
+          <button class="copy-btn text-gray-400 hover:text-white p-1" title="Copy message">
+            <i class="fas fa-copy"></i>
+          </button>
+          <button class="like-btn text-gray-400 hover:text-green-400 p-1" title="Like message">
+            <i class="fas fa-thumbs-up"></i>
+          </button>
+        `;
+      }
+      
+      contentDiv.appendChild(bubbleDiv);
+      contentDiv.appendChild(timeDiv);
+      contentDiv.appendChild(actionsDiv);
+      
+      messageDiv.appendChild(avatarDiv);
+      messageDiv.appendChild(contentDiv);
+      
+      elements.messagesContainer.appendChild(messageDiv);
+      
+      // Add event listeners for actions
+      const copyBtn = actionsDiv.querySelector('.copy-btn');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(message.content);
+          copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+          setTimeout(() => {
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+          }, 2000);
+        });
+      }
+      
+      scrollToBottom();
+    }
+
+    function processMessageContent(content) {
+      // Simple processing for code blocks and formatting
+      let processed = content
+        .replace(/```([^`]+)```/g, '<div class="code-block">$1</div>')
+        .replace(/`([^`]+)`/g, '<code class="bg-gray-800 px-2 py-1 rounded text-sm">$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+      
+      return processed;
+    }
+
+    function showTypingIndicator() {
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'typing-indicator';
+      typingDiv.className = 'message flex gap-4 mb-6 justify-start';
+      
+      typingDiv.innerHTML = `
+        <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-700">
+          <i class="fas fa-robot text-white text-sm"></i>
+        </div>
+        <div class="chat-bubble-bot">
+          <div class="typing-animation">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      `;
+      
+      elements.messagesContainer.appendChild(typingDiv);
+      scrollToBottom();
+    }
+
+    function hideTypingIndicator() {
+      const indicator = document.getElementById('typing-indicator');
+      if (indicator) {
+        indicator.remove();
+      }
+    }
+
+    function generateBotResponse(userMessage) {
+      const lowerMessage = userMessage.toLowerCase();
+      
+      // Find matching response
+      for (const [key, response] of Object.entries(qaData)) {
+        if (lowerMessage.includes(key)) {
+          return response;
+        }
+      }
+      
+      // Default response with some variation
+      const defaultResponses = [
+        "That's an interesting question! I'd be happy to help you explore that topic further.",
+        "I understand what you're asking. Let me think about the best way to address that.",
+        "Thank you for your question. While I don't have a specific answer for that, I can offer some general guidance.",
+        qaData.default
+      ];
+      
+      return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+    }
+
+    async function sendMessage() {
+      const content = elements.messageInput.value.trim();
+      if (!content || isTyping) return;
+      
+      if (!currentUser) {
+        alert('Please log in to send messages.');
+        return;
+      }
+      
+      // Check message limits for free users
+      if (!currentUser.isPaid && currentUser.messageCount >= MAX_FREE_MESSAGES) {
+        alert('You have reached your daily message limit. Upgrade to continue chatting.');
+        return;
+      }
+      
+      // Add user message
+      addMessage(content, true);
+      elements.messageInput.value = '';
+      
+      // Update message count
+      currentUser.messageCount++;
+      updateUser();
+      updateMessageCount();
+      
+      // Show typing indicator
+      isTyping = true;
+      showTypingIndicator();
+      
+      // Simulate bot response delay
+      setTimeout(() => {
+        hideTypingIndicator();
+        const response = generateBotResponse(content);
+        addMessage(response, false);
+        isTyping = false;
+      }, 1500 + Math.random() * 1500);
+    }
+
+    function scrollToBottom() {
+      setTimeout(() => {
+        elements.messagesContainer.scrollTop = elements.messagesContainer.scrollHeight;
+      }, 100);
+    }
+
+    // Search Functions
+    function searchConversations(query) {
+      if (!query.trim()) {
+        updateConversationList();
+        return;
+      }
+      
+      const filteredConversations = conversations.filter(conv => {
+        return conv.title.toLowerCase().includes(query.toLowerCase()) ||
+               conv.messages.some(msg => msg.content.toLowerCase().includes(query.toLowerCase()));
+      });
+      
+      elements.conversationList.innerHTML = '';
+      
+      filteredConversations.forEach(conv => {
+        const div = document.createElement('div');
+        div.className = 'conversation-item p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700';
+        
+        // Highlight search terms
+        let title = conv.title;
+        const regex = new RegExp(`(${query})`, 'gi');
+        title = title.replace(regex, '<span class="search-highlight">$1</span>');
+        
+        div.innerHTML = `
+          <div class="font-medium text-sm">${title}</div>
+          <div class="text-xs text-gray-400 mt-1">${formatTime(conv.updatedAt)}</div>
+        `;
+        
+        div.addEventListener('click', () => {
+          loadConversation(conv);
+          updateConversationList();
+        });
+        
+        elements.conversationList.appendChild(div);
+      });
+    }
+
+    // Export Functions
+    function exportConversation(format) {
+      if (!currentConversation || !currentConversation.messages.length) {
+        alert('No conversation to export.');
+        return;
+      }
+      
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `conversation_${timestamp}`;
+      
+      let content = '';
+      let mimeType = 'text/plain';
+      
+      switch (format) {
+        case 'txt':
+          content = generateTextExport();
+          break;
+        case 'json':
+          content = JSON.stringify(currentConversation, null, 2);
+          mimeType = 'application/json';
+          break;
+        case 'html':
+          content = generateHTMLExport();
+          mimeType = 'text/html';
+          break;
+      }
+      
+      downloadFile(content, `${filename}.${format}`, mimeType);
+      elements.exportModal.classList.add('hidden');
+    }
+
+    function generateTextExport() {
+      let text = `Conversation Export\n`;
+      text += `Generated: ${new Date().toLocaleString()}\n`;
+      text += `Title: ${currentConversation.title}\n`;
+      text += `Messages: ${currentConversation.messages.length}\n\n`;
+      
+      currentConversation.messages.forEach(msg => {
+        const sender = msg.isUser ? 'User' : 'Assistant';
+        const time = new Date(msg.timestamp).toLocaleString();
+        text += `[${time}] ${sender}: ${msg.content}\n\n`;
+      });
+      
+      return text;
+    }
+
+    function generateHTMLExport() {
+      let html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Conversation Export</title>
+          <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+            .message { margin: 20px 0; padding: 15px; border-radius: 10px; }
+            .user { background: #007bff; color: white; margin-left: 20%; }
+            .assistant { background: #f8f9fa; border: 1px solid #ddd; margin-right: 20%; }
+            .timestamp { font-size: 0.8em; opacity: 0.7; margin-top: 5px; }
+            .header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #ddd; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Conversation Export</h1>
+            <p>Generated: ${new Date().toLocaleString()}</p>
+            <p>Title: ${currentConversation.title}</p>
+          </div>
+      `;
+      
+      currentConversation.messages.forEach(msg => {
+        const className = msg.isUser ? 'user' : 'assistant';
+        const sender = msg.isUser ? 'User' : 'Assistant';
+        html += `
+          <div class="message ${className}">
+            <strong>${sender}:</strong>
+            <div>${msg.content.replace(/\n/g, '<br>')}</div>
+            <div class="timestamp">${new Date(msg.timestamp).toLocaleString()}</div>
+          </div>
+        `;
+      });
+      
+      html += '</body></html>';
+      return html;
+    }
+
+    function downloadFile(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auth events
+      document.getElementById('show-signup').addEventListener('click', showSignup);
+      document.getElementById('show-login').addEventListener('click', showLogin);
+      
+      document.getElementById('login-btn').addEventListener('click', () => {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        
+        if (login(email, password)) {
+          document.getElementById('login-email').value = '';
+          document.getElementById('login-password').value = '';
+        } else {
+          alert('Invalid credentials. Try admin@example.com / admin123');
         }
       });
-      saveUsersToLocal(localUsers);
-    }
-  } catch(e) { console.warn("No data.json found, continuing."); }
-
-  try {
-    const r = await fetch("gpt-5o.json");
-    if (r.ok) {
-      qaData = await r.json();
-    }
-  } catch(e) { console.error("Could not load gpt-5o.json:", e); }
-}
-
-// ======= Auth UI wiring =======
-showSignupLink?.addEventListener("click", e => {
-  e.preventDefault();
-  loginForm.classList.add("hidden");
-  signupForm.classList.remove("hidden");
-});
-showLoginLink?.addEventListener("click", e => {
-  e.preventDefault();
-  signupForm.classList.add("hidden");
-  loginForm.classList.remove("hidden");
-});
-
-signupBtn.addEventListener("click", () => {
-  const name = signupName.value.trim();
-  const email = signupEmail.value.trim().toLowerCase();
-  const pass = signupPass.value;
-  if (!name || !email || !pass) { alert("Fill all fields"); return; }
-  const users = loadUsersFromLocal();
-  if (users.some(u => u.email === email)) { alert("Email already in use"); return; }
-  const newUser = { name, email, passwordHash: hashSimple(pass), paid:false, createdAt: Date.now(), messageLog: [], activeModel: MODEL_PREMIUM };
-  users.push(newUser);
-  saveUsersToLocal(users);
-  setCurrentUser(newUser);
-  showProfileForUser(newUser);
-  signupForm.classList.add("hidden"); loginForm.classList.add("hidden");
-});
-
-loginBtn.addEventListener("click", () => {
-  const email = loginEmail.value.trim().toLowerCase();
-  const pass = loginPass.value;
-  const users = loadUsersFromLocal();
-  const found = users.find(u => u.email === email && u.passwordHash === hashSimple(pass));
-  if (!found) { alert("Invalid credentials"); return; }
-  setCurrentUser(found);
-  showProfileForUser(found);
-});
-
-logoutBtn.addEventListener("click", () => {
-  localStorage.removeItem("currentUser");
-  currentUser = null;
-  profilePanel.classList.add("hidden");
-  loginForm.classList.remove("hidden");
-  signupForm.classList.add("hidden");
-});
-
-adminMarkPaidBtn?.addEventListener("click", () => {
-  const email = adminUserEmailInput.value.trim().toLowerCase();
-  if (!email) return alert("Enter email");
-  const users = loadUsersFromLocal();
-  const idx = users.findIndex(u => u.email === email);
-  if (idx === -1) return alert("User not found");
-  users[idx].paid = true;
-  saveUsersToLocal(users);
-  alert(`${email} is now marked paid.`);
-});
-
-modelSelect.addEventListener("change", () => {
-  if (!currentUser) return;
-  if (!currentUser.paid) { modelSelect.value = currentUser.activeModel; return; }
-  currentUser.activeModel = modelSelect.value;
-  setCurrentUser(currentUser);
-  updateModelAndStatsUI();
-});
-
-// ======= Chat logic =======
-function buildMarkovChain(textArray) {
-  const markov = {};
-  textArray.forEach(sentence => {
-    if (!sentence) return;
-    const words = sentence.split(/\s+/).filter(Boolean);
-    for (let i=0;i<words.length-1;i++){
-      const w = words[i].toLowerCase();
-      const nw = words[i+1].toLowerCase();
-      if (!markov[w]) markov[w]=[];
-      markov[w].push(nw);
-    }
-  });
-  return markov;
-}
-function generateMarkovResponse(chain, startWord=null, length=30) {
-  const keys = Object.keys(chain);
-  if (!keys.length) return "";
-  let word = startWord && chain[startWord] ? startWord : keys[Math.floor(Math.random()*keys.length)];
-  const out = [word];
-  for (let i=0;i<length;i++){
-    const next = chain[word];
-    if (!next || !next.length) break;
-    word = next[Math.floor(Math.random()*next.length)];
-    out.push(word);
-  }
-  return out.join(" ");
-}
-function similarity(a,b){
-  const aw = a.toLowerCase().split(/\s+/);
-  const bw = b.toLowerCase().split(/\s+/);
-  const inter = aw.filter(x=>bw.includes(x));
-  return inter.length / Math.max(1, Math.max(aw.length, bw.length));
-}
-
-// === Pipeline ===
-function generateAnswerPipeline(question, activeModel) {
-  const qaItems = qaData["GPT-5o"] || [];
-  const q = question.trim().toLowerCase();
-  let exactMatches = qaItems.filter(it => it.question.toLowerCase() === q);
-
-  function weightedPick(items, qtext) {
-    if (!items.length) return null;
-    if (items.length===1) return items[0];
-    const weights = items.map(it=>{
-      const overlap = qtext.split(/\s+/).filter(w=>it.question.toLowerCase().includes(w)).length;
-      return overlap+1;
+      
+      document.getElementById('signup-btn').addEventListener('click', () => {
+        const name = document.getElementById('signup-name').value;
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+        
+        if (signup(name, email, password)) {
+          document.getElementById('signup-name').value = '';
+          document.getElementById('signup-email').value = '';
+          document.getElementById('signup-password').value = '';
+        } else {
+          alert('User already exists with this email.');
+        }
+      });
+      
+      document.getElementById('logout-btn').addEventListener('click', logout);
+      
+      // Sidebar events
+      elements.sidebarToggle.addEventListener('click', () => {
+        elements.sidebar.classList.add('open');
+      });
+      
+      elements.sidebarClose.addEventListener('click', () => {
+        elements.sidebar.classList.remove('open');
+      });
+      
+      // Chat events
+      elements.sendBtn.addEventListener('click', sendMessage);
+      
+      elements.messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+      
+      // Auto-resize textarea
+      elements.messageInput.addEventListener('input', () => {
+        elements.messageInput.style.height = 'auto';
+        elements.messageInput.style.height = Math.min(elements.messageInput.scrollHeight, 200) + 'px';
+      });
+      
+      // Search events
+      elements.searchInput.addEventListener('input', (e) => {
+        searchConversations(e.target.value);
+      });
+      
+      // New chat button
+      document.getElementById('new-chat-btn').addEventListener('click', createNewConversation);
+      
+      // Clear chat button
+      document.getElementById('clear-chat').addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear this conversation?')) {
+          if (currentConversation) {
+            currentConversation.messages = [];
+            elements.messagesContainer.innerHTML = '';
+            elements.welcomeMessage.classList.remove('hidden');
+            saveConversations();
+          }
+        }
+      });
+      
+      // Export events
+      elements.exportBtn.addEventListener('click', () => {
+        elements.exportModal.classList.remove('hidden');
+      });
+      
+      document.getElementById('export-cancel').addEventListener('click', () => {
+        elements.exportModal.classList.add('hidden');
+      });
+      
+      document.getElementById('export-txt').addEventListener('click', () => exportConversation('txt'));
+      document.getElementById('export-json').addEventListener('click', () => exportConversation('json'));
+      document.getElementById('export-html').addEventListener('click', () => exportConversation('html'));
+      
+      // Theme toggle
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+        const icon = document.querySelector('#theme-toggle i');
+        icon.className = document.body.classList.contains('light-mode') ? 'fas fa-sun' : 'fas fa-moon';
+      });
+      
+      // Model selection
+      document.getElementById('model-select').addEventListener('change', (e) => {
+        elements.currentModelBadge.textContent = e.target.value;
+        if (currentUser) {
+          currentUser.activeModel = e.target.value;
+          updateUser();
+        }
+      });
+      
+      // Close modal on outside click
+      elements.exportModal.addEventListener('click', (e) => {
+        if (e.target === elements.exportModal) {
+          elements.exportModal.classList.add('hidden');
+        }
+      });
+      
+      // Initialize demo user
+      const demoUsers = [
+        {
+          id: 'demo-admin',
+          name: 'Demo Admin',
+          email: 'admin@example.com',
+          password: 'admin123',
+          isPaid: true,
+          createdAt: Date.now(),
+          messageCount: 0,
+          lastReset: Date.now()
+        }
+      ];
+      
+      const existingUsers = loadFromStorage('users', []);
+      if (existingUsers.length === 0) {
+        saveToStorage('users', demoUsers);
+      }
+      
+      // Check for existing user session
+      const savedUser = loadFromStorage('currentUser');
+      if (savedUser) {
+        const users = loadFromStorage('users', []);
+        const user = users.find(u => u.id === savedUser.id);
+        if (user) {
+          currentUser = user;
+          showUserProfile();
+          loadUserConversations();
+        }
+      }
     });
-    const sum = weights.reduce((a,b)=>a+b,0);
-    let r = Math.random()*sum;
-    for (let i=0;i<items.length;i++){ r-=weights[i]; if (r<=0) return items[i]; }
-    return items[0];
-  }
-
-  if (exactMatches.length) {
-    const sel = weightedPick(exactMatches, q);
-    const others = exactMatches.filter(it=>it.answer!==sel.answer).map(it=>it.answer);
-    if (others.length) {
-      const chain = buildMarkovChain([sel.answer].concat(others));
-      const length = activeModel===MODEL_PREMIUM ? 50 : 20;
-      return generateMarkovResponse(chain, sel.answer.split(" ")[0].toLowerCase(), length);
-    } else {
-      if (activeModel===MODEL_PREMIUM) {
-        const chain = buildMarkovChain([sel.answer]);
-        return generateMarkovResponse(chain, sel.answer.split(" ")[0].toLowerCase(), Math.min(40, sel.answer.split(" ").length+10)) || sel.answer;
-      } else return sel.answer;
-    }
-  } else {
-    const sims = qaItems.map(it=>({it,score:similarity(q,it.question)}));
-    const maxScore = Math.max(...sims.map(s=>s.score),0);
-    if (maxScore>0) {
-      const top = sims.filter(s=>s.score===maxScore).map(s=>s.it);
-      const sel = weightedPick(top,q);
-      const related = qaItems.filter(it=>top.some(t=>t.question===it.question)).map(it=>it.answer);
-      if (related.length>1) {
-        const chain = buildMarkovChain(related);
-        const length = activeModel===MODEL_PREMIUM?45:18;
-        return generateMarkovResponse(chain, sel.answer.split(" ")[0].toLowerCase(), length);
-      } else return sel.answer;
-    } else {
-      const unmatched = JSON.parse(localStorage.getItem("unmatchedQuestions")||"[]");
-      unmatched.push(question);
-      localStorage.setItem("unmatchedQuestions", JSON.stringify(unmatched));
-      return activeModel===MODEL_PREMIUM
-        ? "I don't know that yet, but here's a general helpful explanation."
-        : "Sorry, I don't know that.";
-    }
-  }
-}
-
-// gradual display
-function displayTextGradually(element, text, onDone) {
-  const words = text.split(/\s+/).filter(Boolean);
-  let i=0;
-  const delay=100;
-  function step(){
-    if (i>=words.length) { onDone&&onDone(); return; }
-    const chunk = Math.min(words.length-i, Math.floor(Math.random()*3)+2);
-    const slice = words.slice(i,i+chunk).join(" ");
-    element.textContent += (element.textContent ? " " : "") + slice;
-    i+=chunk; setTimeout(step,delay);
-  }
-  step();
-}
-
-// bot response
-function showBotResponse(question) {
-  if (!currentUser) return;
-  isBotTyping = true;
-  const incomingDiv = document.createElement("div");
-  incomingDiv.classList.add("chat");
-  const img = document.createElement("img"); img.src="profile/gpt-5o.jpg"; img.className="avatar";
-  const bubble = document.createElement("div"); bubble.className="bubble";
-  const typingWrap = document.createElement("div");
-  typingWrap.className="typing-animation";
-  typingWrap.innerHTML='<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-  bubble.appendChild(typingWrap);
-  incomingDiv.appendChild(img); incomingDiv.appendChild(bubble);
-  chatContainer.appendChild(incomingDiv); chatContainer.scrollTop=chatContainer.scrollHeight;
-
-  updateModelAndStatsUI();
-  const activeModel = currentUser.activeModel || (currentUser.paid?MODEL_PREMIUM:MODEL_PREMIUM);
-
-  setTimeout(()=>{
-    bubble.innerHTML="";
-    const p=document.createElement("p"); bubble.appendChild(p);
-    const response = generateAnswerPipeline(question,activeModel);
-    displayTextGradually(p,response,()=>{
-      isBotTyping=false;
-      persistChatHTMLForUser();
-      updateModelAndStatsUI();
-      chatContainer.scrollTop=chatContainer.scrollHeight;
-    });
-  },700);
-}
-
-// chat persistence
-function persistChatHTMLForUser() {
-  if (!currentUser) return;
-  const html = chatContainer.innerHTML;
-  const users=loadUsersFromLocal();
-  const idx=users.findIndex(u=>u.email===currentUser.email);
-  if (idx!==-1) { users[idx].chatHTML=html; saveUsersToLocal(users); }
-  setCurrentUser({...currentUser, chatHTML:html});
-}
-function loadChatForUser(user) {
-  if (!user) return;
-  const users=loadUsersFromLocal();
-  const found=users.find(u=>u.email===user.email);
-  if (found?.chatHTML) chatContainer.innerHTML=found.chatHTML;
-  else chatContainer.innerHTML=`<div class="default-text"><h1>GPT-5o ChatBot</h1><p>Start chatting.</p></div>`;
-  chatContainer.scrollTop=chatContainer.scrollHeight;
-}
-
-// send handler
-sendButton.addEventListener("click",()=>handleSend());
-chatInput.addEventListener("keydown",e=>{
-  if (e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); handleSend(); }
-});
-function handleSend(){
-  if (isBotTyping) return;
-  if (!currentUser){ alert("Please login or signup."); return; }
-  const text=chatInput.value.trim(); if (!text) return;
-  const outDiv=document.createElement("div"); outDiv.classList.add("chat","outgoing");
-  const img=document.createElement("img"); img.src="profile/user.jpg"; img.className="avatar";
-  const bubble=document.createElement("div"); bubble.className="bubble"; bubble.textContent=text;
-  outDiv.appendChild(img); outDiv.appendChild(bubble);
-  chatContainer.appendChild(outDiv); chatContainer.scrollTop=chatContainer.scrollHeight;
-  chatInput.value="";
-  recordMessageSent(currentUser); updateModelAndStatsUI();
-  setTimeout(()=>showBotResponse(text),300);
-}
-
-// delete chat
-deleteBtn.addEventListener("click",()=>{
-  if (!currentUser) return;
-  if (!confirm("Delete all chats?")) return;
-  const users=loadUsersFromLocal();
-  const idx=users.findIndex(u=>u.email===currentUser.email);
-  if (idx!==-1){ users[idx].chatHTML=""; saveUsersToLocal(users); }
-  currentUser.chatHTML=""; setCurrentUser(currentUser);
-  loadChatForUser(currentUser);
-});
-
-// theme toggle
-themeBtn.addEventListener("click",()=>{ document.body.classList.toggle("light-mode"); });
-
-// profile UI
-function showProfileForUser(user){
-  if (!user) return;
-  profilePanel.classList.remove("hidden");
-  loginForm.classList.add("hidden"); signupForm.classList.add("hidden");
-  welcomeLine.textContent=(user.email==="admin@gmail.com")?"Welcome, Admin":`Welcome, ${user.name}`;
-  emailLine.textContent=user.email;
-  if (user.email==="admin@gmail.com") adminPanel.classList.remove("hidden");
-  else adminPanel.classList.add("hidden");
-  updateModelAndStatsUI(); loadChatForUser(user);
-}
-
-// init
-(async function init(){
-  await loadSeedData();
-  const users=loadUsersFromLocal();
-  if (!users.some(u=>u.email==="admin@gmail.com")){
-    users.push({ name:"Admin", email:"admin@gmail.com", passwordHash:hashSimple("Admin123"), paid:true, createdAt:Date.now(), messageLog:[], activeModel:MODEL_PREMIUM });
-    saveUsersToLocal(users);
-  }
-  const stored=getCurrentUserFromStorage();
-  if (stored){ const all=loadUsersFromLocal(); const found=all.find(u=>u.email===stored.email); if (found){ setCurrentUser(found); showProfileForUser(found); } }
-  else loginForm.classList.remove("hidden");
-})();</script>
+  </script>
 </body>
 </html>
